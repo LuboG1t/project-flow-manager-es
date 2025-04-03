@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChevronLeft, ChevronRight, CalendarRange } from 'lucide-react';
@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 interface TimesheetEntry {
   id: string;
@@ -20,8 +21,17 @@ interface TimesheetEntry {
 }
 
 export default function Timesheet() {
-  const [viewMode, setViewMode] = React.useState<'personal' | 'project'>('personal');
-  const [selectedProject, setSelectedProject] = React.useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'personal' | 'project'>('personal');
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [editingCell, setEditingCell] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  const userInfo = {
+    name: 'Alejandro Sánchez',
+    role: 'Gerente de Proyecto',
+    capacity: '40h semanales'
+  };
   
   // Mock timesheet data
   const timesheetData = {
@@ -30,54 +40,54 @@ export default function Timesheet() {
       capacity: '40h'
     },
     weekDays: [
-      { day: 'Mon', date: '08 Nov' },
-      { day: 'Tue', date: '09 Nov' },
-      { day: 'Wed', date: '10 Nov' },
-      { day: 'Thu', date: '11 Nov' },
-      { day: 'Fri', date: '12 Nov' },
-      { day: 'Sat', date: '13 Nov' },
-      { day: 'Sun', date: '14 Nov' },
+      { day: 'Lun', date: '08 Nov' },
+      { day: 'Mar', date: '09 Nov' },
+      { day: 'Mie', date: '10 Nov' },
+      { day: 'Jue', date: '11 Nov' },
+      { day: 'Vie', date: '12 Nov' },
+      { day: 'Sab', date: '13 Nov' },
+      { day: 'Dom', date: '14 Nov' },
     ],
     entries: [
       {
         id: 'entry-1',
-        task: 'Create Project Charter',
-        project: 'Wayne Enterprises - Acme HRMS Onboarding',
+        task: 'Crear Acta de Proyecto',
+        project: 'Wayne Enterprises - Implementación HRMS Acme',
         hours: {
-          'Mon': '30m',
-          'Tue': '1h 00m',
-          'Wed': '45m',
-          'Thu': '-',
-          'Fri': '1h 30m',
-          'Sat': '-',
-          'Sun': '-',
+          'Lun': '30m',
+          'Mar': '1h 00m',
+          'Mie': '45m',
+          'Jue': '-',
+          'Vie': '1h 30m',
+          'Sab': '-',
+          'Dom': '-',
         },
         total: '3h 45m'
       },
       {
         id: 'entry-2',
-        task: 'Kick-off Preparation',
-        project: 'Wayne Enterprises - Acme HRMS Onboarding',
+        task: 'Preparación Kick-off',
+        project: 'Wayne Enterprises - Implementación HRMS Acme',
         hours: {
-          'Mon': '1h 00m',
-          'Tue': '20m',
-          'Wed': '2h 30m',
-          'Thu': '15m',
-          'Fri': '-',
-          'Sat': '-',
-          'Sun': '-',
+          'Lun': '1h 00m',
+          'Mar': '20m',
+          'Mie': '2h 30m',
+          'Jue': '15m',
+          'Vie': '-',
+          'Sab': '-',
+          'Dom': '-',
         },
         total: '4h 05m'
       }
     ],
     totals: {
-      'Mon': '1h 30m',
-      'Tue': '1h 20m',
-      'Wed': '3h 15m',
-      'Thu': '15m',
-      'Fri': '1h 30m',
-      'Sat': '0m',
-      'Sun': '0m',
+      'Lun': '1h 30m',
+      'Mar': '1h 20m',
+      'Mie': '3h 15m',
+      'Jue': '15m',
+      'Vie': '1h 30m',
+      'Sab': '0m',
+      'Dom': '0m',
       'total': '7h 50m'
     }
   };
@@ -96,43 +106,43 @@ export default function Timesheet() {
         entries: [
           {
             id: 'entry-1',
-            task: 'Create Project Charter',
-            project: 'Wayne Enterprises - Acme HRMS Onboarding',
+            task: 'Crear Acta de Proyecto',
+            project: 'Wayne Enterprises - Implementación HRMS Acme',
             hours: {
-              'Mon': '30m',
-              'Tue': '1h 00m',
-              'Wed': '45m',
-              'Thu': '-',
-              'Fri': '1h 30m',
-              'Sat': '-',
-              'Sun': '-',
+              'Lun': '30m',
+              'Mar': '1h 00m',
+              'Mie': '45m',
+              'Jue': '-',
+              'Vie': '1h 30m',
+              'Sab': '-',
+              'Dom': '-',
             },
             total: '3h 45m'
           },
           {
             id: 'entry-2',
-            task: 'Kick-off Preparation',
-            project: 'Wayne Enterprises - Acme HRMS Onboarding',
+            task: 'Preparación Kick-off',
+            project: 'Wayne Enterprises - Implementación HRMS Acme',
             hours: {
-              'Mon': '1h 00m',
-              'Tue': '20m',
-              'Wed': '2h 30m',
-              'Thu': '15m',
-              'Fri': '-',
-              'Sat': '-',
-              'Sun': '-',
+              'Lun': '1h 00m',
+              'Mar': '20m',
+              'Mie': '2h 30m',
+              'Jue': '15m',
+              'Vie': '-',
+              'Sab': '-',
+              'Dom': '-',
             },
             total: '4h 05m'
           },
         ],
         subtotal: {
-          'Mon': '1h 30m',
-          'Tue': '1h 20m',
-          'Wed': '3h 15m',
-          'Thu': '15m',
-          'Fri': '1h 30m',
-          'Sat': '0m',
-          'Sun': '0m',
+          'Lun': '1h 30m',
+          'Mar': '1h 20m',
+          'Mie': '3h 15m',
+          'Jue': '15m',
+          'Vie': '1h 30m',
+          'Sab': '0m',
+          'Dom': '0m',
           'total': '7h 50m'
         }
       },
@@ -143,84 +153,135 @@ export default function Timesheet() {
         entries: [
           {
             id: 'entry-3',
-            task: 'Create Project Charter',
-            project: 'Wayne Enterprises - Acme HRMS Onboarding',
+            task: 'Crear Acta de Proyecto',
+            project: 'Wayne Enterprises - Implementación HRMS Acme',
             hours: {
-              'Mon': '30m',
-              'Tue': '1h 00m',
-              'Wed': '45m',
-              'Thu': '-',
-              'Fri': '1h 30m',
-              'Sat': '-',
-              'Sun': '-',
+              'Lun': '30m',
+              'Mar': '1h 00m',
+              'Mie': '45m',
+              'Jue': '-',
+              'Vie': '1h 30m',
+              'Sab': '-',
+              'Dom': '-',
             },
             total: '3h 45m'
           },
           {
             id: 'entry-4',
-            task: 'Kick-off Preparation',
-            project: 'Wayne Enterprises - Acme HRMS Onboarding',
+            task: 'Preparación Kick-off',
+            project: 'Wayne Enterprises - Implementación HRMS Acme',
             hours: {
-              'Mon': '1h 00m',
-              'Tue': '20m',
-              'Wed': '2h 30m',
-              'Thu': '15m',
-              'Fri': '-',
-              'Sat': '-',
-              'Sun': '-',
+              'Lun': '1h 00m',
+              'Mar': '20m',
+              'Mie': '2h 30m',
+              'Jue': '15m',
+              'Vie': '-',
+              'Sab': '-',
+              'Dom': '-',
             },
             total: '4h 05m'
           },
         ],
         subtotal: {
-          'Mon': '1h 30m',
-          'Tue': '1h 20m',
-          'Wed': '3h 15m',
-          'Thu': '15m',
-          'Fri': '1h 30m',
-          'Sat': '0m',
-          'Sun': '0m',
+          'Lun': '1h 30m',
+          'Mar': '1h 20m',
+          'Mie': '3h 15m',
+          'Jue': '15m',
+          'Vie': '1h 30m',
+          'Sab': '0m',
+          'Dom': '0m',
           'total': '7h 50m'
         }
       }
     ],
     totals: {
-      'Mon': '1h 30m',
-      'Tue': '1h 20m',
-      'Wed': '3h 15m',
-      'Thu': '15m',
-      'Fri': '1h 30m',
-      'Sat': '0m',
-      'Sun': '0m',
+      'Lun': '1h 30m',
+      'Mar': '1h 20m',
+      'Mie': '3h 15m',
+      'Jue': '15m',
+      'Vie': '1h 30m',
+      'Sab': '0m',
+      'Dom': '0m',
       'total': '7h 50m'
     }
+  };
+
+  const handleCellClick = (entryId: string, day: string) => {
+    const cellId = `${entryId}-${day}`;
+    let initialValue = '';
+    
+    // Find the correct entry and get its hour value for the selected day
+    if (viewMode === 'personal') {
+      const entry = timesheetData.entries.find(e => e.id === entryId);
+      if (entry) {
+        initialValue = entry.hours[day];
+      }
+    } else {
+      // Handle project view
+      for (const resource of projectTimesheetData.resources) {
+        const entry = resource.entries.find(e => e.id === entryId);
+        if (entry) {
+          initialValue = entry.hours[day];
+          break;
+        }
+      }
+    }
+    
+    if (initialValue === '-') {
+      initialValue = '';
+    }
+    
+    setEditingCell(cellId);
+    setEditValue(initialValue);
+    
+    // Focus on the input after it's rendered
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 0);
+  };
+  
+  const handleSaveEdit = () => {
+    // Here you would implement the logic to update the hour value in your data
+    console.log('Saving edit for cell:', editingCell, 'with value:', editValue);
+    
+    // Reset editing state
+    setEditingCell(null);
+    setEditValue('');
   };
   
   const renderPersonalTimesheet = () => {
     return (
       <>
-        <div className="flex items-center justify-between mb-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">Tiempo total registrado</h2>
-              <span className="text-xl font-bold">{timesheetData.tracking.total}</span>
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
+            <div>
+              <h2 className="text-xl font-medium">{userInfo.name}</h2>
+              <p className="text-muted-foreground">{userInfo.role}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-md font-medium">Capacidad de Srikrishnan</h2>
-              <span className="text-md font-medium">{timesheetData.tracking.capacity}</span>
+            <div className="mt-2 md:mt-0 text-sm">
+              <span className="font-medium">Capacidad:</span> {userInfo.capacity}
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="gap-1.5" size="sm">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="gap-1.5">
-              <span className="text-sm">08 Nov 21 - 14 Nov 21</span>
-            </Button>
-            <Button variant="outline" className="gap-1.5" size="sm">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-medium">Tiempo total registrado:</h2>
+              <span className="text-lg font-bold">{timesheetData.tracking.total}</span>
+            </div>
+            
+            <div className="flex items-center gap-2 mt-2 md:mt-0">
+              <Button variant="outline" className="gap-1.5" size="sm">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" className="gap-1.5">
+                <span className="text-sm">08 Nov 21 - 14 Nov 21</span>
+              </Button>
+              <Button variant="outline" className="gap-1.5" size="sm">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
         
@@ -228,7 +289,7 @@ export default function Timesheet() {
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow>
-                <TableHead className="w-[300px] bg-muted/70">Tasks</TableHead>
+                <TableHead className="w-[300px] bg-muted/70">Tareas</TableHead>
                 {timesheetData.weekDays.map((day) => (
                   <TableHead 
                     key={day.day} 
@@ -240,7 +301,7 @@ export default function Timesheet() {
                     </div>
                   </TableHead>
                 ))}
-                <TableHead className="text-center bg-muted/70">Total time</TableHead>
+                <TableHead className="text-center bg-muted/70">Tiempo total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -253,8 +314,27 @@ export default function Timesheet() {
                     </div>
                   </TableCell>
                   {timesheetData.weekDays.map((day) => (
-                    <TableCell key={`${entry.id}-${day.day}`} className="text-center">
-                      {entry.hours[day.day]}
+                    <TableCell 
+                      key={`${entry.id}-${day.day}`} 
+                      className="text-center p-0"
+                      onClick={() => handleCellClick(entry.id, day.day)}
+                    >
+                      {editingCell === `${entry.id}-${day.day}` ? (
+                        <div className="p-2">
+                          <Input 
+                            ref={inputRef}
+                            value={editValue} 
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onBlur={handleSaveEdit}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+                            className="h-8 text-center"
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-4 cursor-pointer hover:bg-muted/20">
+                          {entry.hours[day.day]}
+                        </div>
+                      )}
                     </TableCell>
                   ))}
                   <TableCell className="text-center font-medium bg-muted/5">
@@ -263,7 +343,7 @@ export default function Timesheet() {
                 </TableRow>
               ))}
               <TableRow className="bg-muted/20">
-                <TableCell className="font-medium">Total time</TableCell>
+                <TableCell className="font-medium">Tiempo total</TableCell>
                 {timesheetData.weekDays.map((day) => (
                   <TableCell key={`total-${day.day}`} className="text-center font-medium">
                     {timesheetData.totals[day.day]}
@@ -283,39 +363,45 @@ export default function Timesheet() {
   const renderProjectTimesheet = () => {
     return (
       <>
-        <div className="flex items-center justify-between mb-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">Tiempo total registrado</h2>
-              <span className="text-xl font-bold">{projectTimesheetData.tracking.total}</span>
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
+            <div>
+              <h2 className="text-xl font-medium">Vista de proyecto</h2>
+              <p className="text-muted-foreground">Seguimiento de tiempo por miembro del equipo</p>
             </div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-md font-medium">Capacidad del equipo</h2>
-              <span className="text-md font-medium">{projectTimesheetData.tracking.capacity}</span>
+            <div className="mt-2 md:mt-0 text-sm">
+              <span className="font-medium">Capacidad del equipo:</span> {projectTimesheetData.tracking.capacity}
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Select defaultValue="proyecto-1a">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Seleccionar proyecto" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los proyectos</SelectItem>
-                <SelectItem value="proyecto-1a">Proyecto 1A</SelectItem>
-                <SelectItem value="proyecto-1b">Proyecto 1B</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-medium">Tiempo total registrado:</h2>
+              <span className="text-lg font-bold">{projectTimesheetData.tracking.total}</span>
+            </div>
             
-            <Button variant="outline" className="gap-1.5" size="sm">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="gap-1.5">
-              <span className="text-sm">08 Nov 21 - 14 Nov 21</span>
-            </Button>
-            <Button variant="outline" className="gap-1.5" size="sm">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2 mt-2 md:mt-0">
+              <Select defaultValue="proyecto-1a">
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Seleccionar proyecto" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los proyectos</SelectItem>
+                  <SelectItem value="proyecto-1a">Proyecto 1A</SelectItem>
+                  <SelectItem value="proyecto-1b">Proyecto 1B</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button variant="outline" className="gap-1.5" size="sm">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" className="gap-1.5">
+                <span className="text-sm">08 Nov 21 - 14 Nov 21</span>
+              </Button>
+              <Button variant="outline" className="gap-1.5" size="sm">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
         
@@ -323,7 +409,7 @@ export default function Timesheet() {
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow>
-                <TableHead className="w-[300px] bg-muted/70">Tasks</TableHead>
+                <TableHead className="w-[300px] bg-muted/70">Tareas</TableHead>
                 {timesheetData.weekDays.map((day) => (
                   <TableHead 
                     key={day.day} 
@@ -335,7 +421,7 @@ export default function Timesheet() {
                     </div>
                   </TableHead>
                 ))}
-                <TableHead className="text-center bg-muted/70">Total time</TableHead>
+                <TableHead className="text-center bg-muted/70">Tiempo total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -370,8 +456,27 @@ export default function Timesheet() {
                         </div>
                       </TableCell>
                       {timesheetData.weekDays.map((day) => (
-                        <TableCell key={`${entry.id}-${day.day}`} className="text-center">
-                          {entry.hours[day.day]}
+                        <TableCell 
+                          key={`${entry.id}-${day.day}`} 
+                          className="text-center p-0"
+                          onClick={() => handleCellClick(entry.id, day.day)}
+                        >
+                          {editingCell === `${entry.id}-${day.day}` ? (
+                            <div className="p-2">
+                              <Input 
+                                ref={inputRef}
+                                value={editValue} 
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={handleSaveEdit}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+                                className="h-8 text-center"
+                              />
+                            </div>
+                          ) : (
+                            <div className="p-4 cursor-pointer hover:bg-muted/20">
+                              {entry.hours[day.day]}
+                            </div>
+                          )}
                         </TableCell>
                       ))}
                       <TableCell className="text-center">
@@ -383,7 +488,7 @@ export default function Timesheet() {
                   {/* Subtotal row for this resource */}
                   <TableRow className="border-t">
                     <TableCell className="text-sm bg-muted/5">
-                      Subtotal time
+                      Tiempo subtotal
                     </TableCell>
                     {timesheetData.weekDays.map((day) => (
                       <TableCell key={`${resource.id}-subtotal-${day.day}`} className="text-center text-sm bg-muted/5">
@@ -399,7 +504,7 @@ export default function Timesheet() {
               
               {/* Total row */}
               <TableRow className="bg-muted/20">
-                <TableCell className="font-medium">Total time</TableCell>
+                <TableCell className="font-medium">Tiempo total</TableCell>
                 {timesheetData.weekDays.map((day) => (
                   <TableCell key={`total-${day.day}`} className="text-center font-medium">
                     {projectTimesheetData.totals[day.day]}

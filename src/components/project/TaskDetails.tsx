@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { X, Calendar, Clock, ChevronDown, CheckCircle, Circle, Upload, Paperclip, Link, ArrowRight, Play, MessageSquare, Calendar as CalendarIcon } from 'lucide-react';
+import { X, Calendar, Clock, ChevronDown, CheckCircle, Circle, Upload, Paperclip, Link, ArrowRight, Play, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Avatar } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -17,6 +17,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface Subtask {
   id: string;
@@ -41,6 +46,8 @@ interface TaskDetailsProps {
 
 export function TaskDetails({ task, onClose }: TaskDetailsProps) {
   const [newCommentText, setNewCommentText] = useState('');
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [subtasks, setSubtasks] = useState<Subtask[]>([
     { id: 'st-1', name: 'Sistema de Gestión de Tickets', completed: false },
   ]);
@@ -67,6 +74,18 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
     'in-review': 'En revisión',
     'new': 'Nuevo',
   };
+  
+  const priorityColors = {
+    'high': 'text-red-500 bg-red-50',
+    'medium': 'text-amber-500 bg-amber-50',
+    'low': 'text-green-500 bg-green-50',
+  };
+  
+  const priorityLabels = {
+    'high': 'Alta',
+    'medium': 'Media',
+    'low': 'Baja',
+  };
 
   const handleToggleSubtask = (id: string) => {
     setSubtasks(prev => prev.map(st => 
@@ -90,7 +109,7 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
   };
   
   return (
-    <div className="w-[420px] border-l bg-background flex flex-col h-full animate-slide-in-right">
+    <div className="w-[520px] border-l bg-background flex flex-col h-full animate-slide-in-right">
       <div className="p-4 border-b flex items-center justify-between">
         <h2 className="font-semibold text-lg">Detalles de la tarea</h2>
         <Button variant="ghost" size="icon" onClick={onClose}>
@@ -104,7 +123,7 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
           <div className="space-y-4">
             <h3 className="text-lg font-medium">{task.name}</h3>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-3">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Estado</p>
                 <Select defaultValue={task.status}>
@@ -122,19 +141,59 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
               
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Asignado a</p>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-7 w-7 bg-primary">
-                    <span className="text-xs">{task.assignedTo.initials}</span>
-                  </Avatar>
-                  <span className="text-sm">{task.assignedTo.name}</span>
-                </div>
+                <Select defaultValue="user1">
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-5 w-5">
+                          <AvatarImage src="/avatar-person.jpg" />
+                          <AvatarFallback>AS</AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs">Alejandro</span>
+                      </div>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user1">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-5 w-5">
+                          <AvatarImage src="/avatar-person.jpg" />
+                          <AvatarFallback>AS</AvatarFallback>
+                        </Avatar>
+                        <span>Alejandro Sánchez</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="user2">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-5 w-5">
+                          <AvatarImage src="/avatar-person-2.jpg" />
+                          <AvatarFallback>ML</AvatarFallback>
+                        </Avatar>
+                        <span>María López</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Prioridad</p>
                 <Select defaultValue={task.priority}>
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      <span className={`inline-flex items-center gap-1.5 ${priorityColors[task.priority as keyof typeof priorityColors]} px-2 py-0.5 rounded-md text-xs`}>
+                        <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3">
+                          <path
+                            d="M12 7.75V12.25M12 16.25V16.26M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <span>{priorityLabels[task.priority as keyof typeof priorityLabels]}</span>
+                      </span>
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="low">Baja</SelectItem>
@@ -146,62 +205,42 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
               
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Fecha</p>
-                <div className="flex items-center gap-1 text-sm">
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                  <span>{task.startDate} - {task.endDate} ({task.duration})</span>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left text-sm">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {task.startDate} - {task.endDate}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <div className="p-3">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Fecha de inicio:</p>
+                        <CalendarComponent
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          className="rounded-md border"
+                        />
+                      </div>
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium">Fecha de fin:</p>
+                        <CalendarComponent
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          className="rounded-md border"
+                        />
+                      </div>
+                      <Button className="mt-4 w-full">Aplicar</Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
           
           <Separator />
-          
-          {/* Subtareas */}
-          <div>
-            <div className="flex items-center justify-between">
-              <p className="font-medium flex items-center gap-2">
-                <span className="text-muted-foreground">1</span> subtarea
-              </p>
-            </div>
-            
-            <div className="mt-2 space-y-2">
-              {subtasks.map(subtask => (
-                <div key={subtask.id} className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6"
-                    onClick={() => handleToggleSubtask(subtask.id)}
-                  >
-                    {subtask.completed ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </Button>
-                  <span className={subtask.completed ? 'line-through text-muted-foreground' : ''}>
-                    {subtask.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Archivos */}
-          <div>
-            <div className="flex items-center justify-between">
-              <p className="font-medium">Archivos</p>
-              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
-                <Upload className="h-3.5 w-3.5 mr-1" />
-                Añadir archivos
-              </Button>
-            </div>
-            
-            <div className="mt-2 border border-dashed rounded-md p-4 text-center text-muted-foreground">
-              <Paperclip className="h-5 w-5 mx-auto mb-1" />
-              <p className="text-sm">Arrastra archivos aquí o haz clic para subir</p>
-            </div>
-          </div>
           
           {/* Dependencias */}
           <div>
@@ -237,6 +276,41 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
             </div>
           </div>
           
+          {/* Subtareas */}
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="font-medium flex items-center gap-2">
+                <span className="text-muted-foreground">1</span> subtarea
+              </p>
+              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
+                <Plus className="h-3.5 w-3.5 mr-1" />
+                Añadir subtarea
+              </Button>
+            </div>
+            
+            <div className="mt-2 space-y-2">
+              {subtasks.map(subtask => (
+                <div key={subtask.id} className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6"
+                    onClick={() => handleToggleSubtask(subtask.id)}
+                  >
+                    {subtask.completed ? (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </Button>
+                  <span className={subtask.completed ? 'line-through text-muted-foreground' : ''}>
+                    {subtask.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
           {/* Time tracking */}
           <div>
             <p className="font-medium mb-2">Tiempo registrado</p>
@@ -252,6 +326,22 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
                   Iniciar
                 </Button>
               </div>
+            </div>
+          </div>
+          
+          {/* Archivos */}
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="font-medium">Archivos</p>
+              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
+                <Upload className="h-3.5 w-3.5 mr-1" />
+                Añadir archivos
+              </Button>
+            </div>
+            
+            <div className="mt-2 border border-dashed rounded-md p-4 text-center text-muted-foreground">
+              <Paperclip className="h-5 w-5 mx-auto mb-1" />
+              <p className="text-sm">Arrastra archivos aquí o haz clic para subir</p>
             </div>
           </div>
           
@@ -273,7 +363,7 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
               {comments.map(comment => (
                 <div key={comment.id} className="flex gap-3">
                   <Avatar className="h-8 w-8 flex-shrink-0">
-                    <span className="text-xs">{comment.user.initials}</span>
+                    <AvatarFallback>{comment.user.initials}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex justify-between">
@@ -288,7 +378,7 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
             
             <div className="flex gap-2">
               <Avatar className="h-8 w-8 flex-shrink-0">
-                <span className="text-xs">TU</span>
+                <AvatarFallback>TU</AvatarFallback>
               </Avatar>
               <div className="flex-1 rounded-md border overflow-hidden">
                 <textarea 

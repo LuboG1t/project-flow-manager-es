@@ -1,222 +1,353 @@
+
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { CalendarIcon, Plus, X } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Plus, Trash2 } from 'lucide-react';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+} from '@/components/ui/select';
+
+interface Collaborator {
+  id: string;
+  name: string;
+  role: string;
+  avatar?: string;
+}
 
 interface ProjectModalProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
+  project?: {
+    id: string;
+    name: string;
+    objectives: string;
+    startDate: Date;
+    endDate: Date;
+    budget: string;
+    lead: {
+      id: string;
+      name: string;
+      avatar?: string;
+    };
+    collaborators: Collaborator[];
+    progress?: number;
+    taskCount?: number;
+    taskStatus?: {
+      completed: number;
+      inProgress: number;
+      pending: number;
+    };
+  };
 }
 
-export default function ProjectModal({ open, onClose }: ProjectModalProps) {
-  const [formValues, setFormValues] = useState({
-    name: '',
-    description: '',
-    company: '',
-    startDate: undefined,
-    endDate: undefined,
-  });
-
-  const [teamMembers, setTeamMembers] = useState([
-    { id: 1, name: '', role: '' },
-  ]);
-
-  const [currentTeamMember, setCurrentTeamMember] = useState({ id: 0, name: '', role: '' });
-
-  const handleChange = (field: string, value: any) => {
-    setFormValues({ ...formValues, [field]: value });
+const ProjectModal = ({ open, onOpenChange, project }: ProjectModalProps) => {
+  const isEdit = !!project;
+  
+  const [name, setName] = useState(project?.name || '');
+  const [objectives, setObjectives] = useState(project?.objectives || '');
+  const [startDate, setStartDate] = useState<Date | undefined>(project?.startDate);
+  const [endDate, setEndDate] = useState<Date | undefined>(project?.endDate);
+  const [budget, setBudget] = useState(project?.budget || '');
+  const [leader, setLeader] = useState(project?.lead?.id || '');
+  const [collaborators, setCollaborators] = useState<Collaborator[]>(project?.collaborators || []);
+  
+  // Mock data
+  const teamMembers = [
+    { id: 'member1', name: 'Alejandro Sánchez', role: 'Gerente de Proyecto', avatar: '' },
+    { id: 'member2', name: 'María López', role: 'Diseñadora', avatar: '' },
+    { id: 'member3', name: 'Carlos Gómez', role: 'Desarrollador', avatar: '' },
+    { id: 'member4', name: 'Laura Torres', role: 'Analista de QA', avatar: '' },
+  ];
+  
+  const availableRoles = [
+    'Gerente de Proyecto',
+    'Desarrollador',
+    'Diseñador',
+    'Analista de QA',
+    'Arquitecto',
+    'Especialista UX',
+    'Consultor'
+  ];
+  
+  const handleAddCollaborator = (memberId: string, role: string) => {
+    const member = teamMembers.find(m => m.id === memberId);
+    if (member && !collaborators.some(c => c.id === memberId)) {
+      setCollaborators([...collaborators, { 
+        id: member.id, 
+        name: member.name, 
+        role, 
+        avatar: member.avatar 
+      }]);
+    }
   };
-
-  const handleAddTeamMember = () => {
-    const newId = teamMembers.length > 0 ? Math.max(...teamMembers.map(member => member.id)) + 1 : 1;
-    setTeamMembers([...teamMembers, { id: newId, name: '', role: '' }]);
+  
+  const handleRemoveCollaborator = (id: string) => {
+    setCollaborators(collaborators.filter(c => c.id !== id));
   };
-
-  const handleRemoveTeamMember = (id: number) => {
-    setTeamMembers(teamMembers.filter(member => member.id !== id));
+  
+  const handleCreate = () => {
+    // Aquí iría la lógica para crear o actualizar el proyecto
+    const projectData = {
+      name,
+      objectives,
+      startDate,
+      endDate,
+      budget,
+      lead: teamMembers.find(m => m.id === leader),
+      collaborators
+    };
+    
+    console.log('Datos del proyecto:', projectData);
+    onOpenChange(false);
   };
-
-  const updateTeamMember = (id: number, field: string, value: string) => {
-    setTeamMembers(
-      teamMembers.map(member =>
-        member.id === id ? { ...member, [field]: value } : member
-      )
-    );
-  };
-
+  
   return (
-    <AlertDialog open={open} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Nuevo proyecto</AlertDialogTitle>
-          <AlertDialogDescription>
-            Completa los campos para crear un nuevo proyecto.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nombre
-            </Label>
-            <Input id="name" value={formValues.name} onChange={(e) => handleChange("name", e.target.value)} className="col-span-3" />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</DialogTitle>
+          <DialogDescription>
+            {isEdit 
+              ? 'Actualiza la información de tu proyecto existente.' 
+              : 'Completa los detalles para crear un nuevo proyecto.'}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid gap-6 py-4">
+          <div className="grid gap-3">
+            <Label htmlFor="name">Nombre del Proyecto</Label>
+            <Input 
+              id="name" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              placeholder="Ingresa el nombre del proyecto" 
+            />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Descripción
-            </Label>
-            <Textarea id="description" value={formValues.description} onChange={(e) => handleChange("description", e.target.value)} className="col-span-3" />
+          
+          <div className="grid gap-3">
+            <Label htmlFor="objectives">Objetivos</Label>
+            <Textarea 
+              id="objectives" 
+              value={objectives} 
+              onChange={(e) => setObjectives(e.target.value)} 
+              placeholder="Describe los objetivos del proyecto"
+              className="min-h-[100px]" 
+            />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="company" className="text-right">
-              Empresa
-            </Label>
-            <Select
-              name="company"
-              value={formValues.company}
-              onValueChange={(value) => handleChange("company", value)}
-            >
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-3">
+              <Label>Fecha de Inicio</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? (
+                      format(startDate, "PPP", { locale: es })
+                    ) : (
+                      <span>Selecciona una fecha</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div className="grid gap-3">
+              <Label>Fecha de Finalización</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? (
+                      format(endDate, "PPP", { locale: es })
+                    ) : (
+                      <span>Selecciona una fecha</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          
+          <div className="grid gap-3">
+            <Label htmlFor="budget">Presupuesto Estimado</Label>
+            <Input 
+              id="budget" 
+              value={budget} 
+              onChange={(e) => setBudget(e.target.value)} 
+              placeholder="Ej: $10,000" 
+            />
+          </div>
+          
+          <div className="grid gap-3">
+            <Label htmlFor="leader">Responsable del Proyecto</Label>
+            <Select value={leader} onValueChange={setLeader}>
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar empresa" />
+                <SelectValue placeholder="Selecciona un responsable" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="interna">Interna</SelectItem>
-                <SelectItem value="empresa-a">Empresa A</SelectItem>
-                <SelectItem value="empresa-b">Empresa B</SelectItem>
+                {teamMembers.map((member) => (
+                  <SelectItem key={member.id} value={member.id}>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback>{member.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <span>{member.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="startDate" className="text-right">
-              Fecha de inicio
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "col-span-3 justify-start text-left font-normal",
-                    !formValues.startDate && "text-muted-foreground"
-                  )}
-                >
-                  {formValues.startDate ? format(formValues.startDate, "PPP") : (
-                    <span>Seleccionar fecha</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formValues.startDate}
-                  onSelect={(date) => handleChange("startDate", date)}
-                  disabled={(date) =>
-                    date > (formValues.endDate || new Date("2100-01-01"))
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="endDate" className="text-right">
-              Fecha de fin
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "col-span-3 justify-start text-left font-normal",
-                    !formValues.endDate && "text-muted-foreground"
-                  )}
-                >
-                  {formValues.endDate ? format(formValues.endDate, "PPP") : (
-                    <span>Seleccionar fecha</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formValues.endDate}
-                  onSelect={(date) => handleChange("endDate", date)}
-                  disabled={(date) =>
-                    date < (formValues.startDate || new Date("1900-01-01"))
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center">
-              <Label htmlFor="team">Equipo</Label>
-              <Button type="button" variant="secondary" size="sm" onClick={handleAddTeamMember}>
-                <Plus className="h-4 w-4 mr-2" />
-                Añadir miembro
-              </Button>
-            </div>
-            <div className="space-y-2 mt-2">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="flex items-center space-x-2">
-                  <Input
-                    type="text"
-                    placeholder="Nombre"
-                    value={member.name}
-                    onChange={(e) => updateTeamMember(member.id, 'name', e.target.value)}
-                  />
-                  <Select
-                    name="teamRole" 
-                    value={currentTeamMember.role}
-                    onValueChange={(value) => setCurrentTeamMember({ ...currentTeamMember, role: value })}
+          
+          <div className="grid gap-3">
+            <Label>Colaboradores del Proyecto</Label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {collaborators.map(collaborator => (
+                <div key={collaborator.id} className="flex items-center gap-1.5 bg-muted rounded-md p-1 pl-2 pr-1">
+                  <Avatar className="h-5 w-5">
+                    <AvatarFallback>{collaborator.name.substring(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs">{collaborator.name}</span>
+                  <span className="text-xs text-muted-foreground">({collaborator.role})</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4" 
+                    onClick={() => handleRemoveCollaborator(collaborator.id)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar rol" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pm">Gerente de Proyecto</SelectItem>
-                      <SelectItem value="developer">Desarrollador</SelectItem>
-                      <SelectItem value="designer">Diseñador</SelectItem>
-                      <SelectItem value="tester">Tester</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveTeamMember(member.id)}>
-                    <Trash2 className="h-4 w-4" />
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
               ))}
             </div>
+            
+            <div className="flex items-center gap-2">
+              <Select onValueChange={(value) => setLeader(value)}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Selecciona un colaborador" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamMembers
+                    .filter(m => !collaborators.some(c => c.id === m.id))
+                    .map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback>{member.name.substring(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <span>{member.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              
+              <Select onValueChange={(role) => handleAddCollaborator(leader, role)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableRoles.map(role => (
+                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Button variant="outline" size="icon" onClick={() => handleAddCollaborator(leader, 'Desarrollador')}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+          
+          {isEdit && project?.taskCount && project?.progress !== undefined && project?.taskStatus && (
+            <div className="grid gap-3">
+              <Label>Estado del Proyecto</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 border rounded-md bg-card">
+                  <p className="text-sm text-muted-foreground">Tareas totales</p>
+                  <h3 className="text-xl font-bold">{project.taskCount}</h3>
+                </div>
+                <div className="p-3 border rounded-md bg-card">
+                  <p className="text-sm text-muted-foreground">Progreso</p>
+                  <h3 className="text-xl font-bold">{project.progress}%</h3>
+                </div>
+                <div className="p-3 border rounded-md bg-card">
+                  <p className="text-sm text-muted-foreground">Estado</p>
+                  <div className="flex items-center gap-2 text-xs mt-1">
+                    <span className="flex items-center gap-1 text-green-600">
+                      <span className="h-2 w-2 bg-green-600 rounded-full"></span>
+                      {project.taskStatus.completed} completadas
+                    </span>
+                    <span className="flex items-center gap-1 text-blue-600">
+                      <span className="h-2 w-2 bg-blue-600 rounded-full"></span>
+                      {project.taskStatus.inProgress} en progreso
+                    </span>
+                    <span className="flex items-center gap-1 text-gray-600">
+                      <span className="h-2 w-2 bg-gray-600 rounded-full"></span>
+                      {project.taskStatus.pending} pendientes
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction>Crear</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button onClick={handleCreate}>{isEdit ? 'Guardar cambios' : 'Crear proyecto'}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-}
+};
+
+export default ProjectModal;

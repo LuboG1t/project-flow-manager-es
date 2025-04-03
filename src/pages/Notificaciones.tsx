@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { 
@@ -26,7 +26,8 @@ interface Notification {
 }
 
 export default function Notificaciones() {
-  const notifications: Notification[] = [
+  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
       type: 'assignment',
@@ -96,7 +97,29 @@ export default function Notificaciones() {
       read: true,
       icon: <Share2 className="h-5 w-5 text-purple-500" />
     }
-  ];
+  ]);
+  
+  const filteredNotifications = filter === 'all' 
+    ? notifications 
+    : notifications.filter(n => !n.read);
+  
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(prev => 
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
+    );
+  };
+  
+  const handleMarkAllAsRead = () => {
+    setNotifications(prev => 
+      prev.map(n => ({ ...n, read: true }))
+    );
+  };
+  
+  const handleDelete = (id: string) => {
+    setNotifications(prev => 
+      prev.filter(n => n.id !== id)
+    );
+  };
   
   return (
     <Layout>
@@ -108,7 +131,11 @@ export default function Notificaciones() {
           </div>
           
           <div className="flex items-center gap-2">
-            <Tabs defaultValue="all">
+            <Tabs 
+              defaultValue="all" 
+              value={filter} 
+              onValueChange={(value) => setFilter(value as 'all' | 'unread')}
+            >
               <TabsList>
                 <TabsTrigger value="all" className="flex items-center gap-1">
                   <span>Todas</span>
@@ -125,12 +152,12 @@ export default function Notificaciones() {
               </TabsList>
             </Tabs>
             
-            <Button variant="outline" size="sm">Marcar todas como leídas</Button>
+            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead}>Marcar todas como leídas</Button>
           </div>
         </div>
         
         <div className="space-y-4">
-          {notifications.map((notification) => (
+          {filteredNotifications.map((notification) => (
             <div 
               key={notification.id}
               className={`p-4 border rounded-lg flex items-start gap-4 transition-colors ${
@@ -173,20 +200,40 @@ export default function Notificaciones() {
                     )}
                   </div>
                   
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    {!notification.read && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7" 
+                        onClick={() => handleMarkAsRead(notification.id)}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7" 
+                      onClick={() => handleDelete(notification.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3">
                   <Button size="sm" variant="outline">Ver detalles</Button>
-                  {!notification.read && (
-                    <Button size="sm" variant="ghost">Marcar como leída</Button>
-                  )}
                 </div>
               </div>
             </div>
           ))}
+          
+          {filteredNotifications.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No hay notificaciones {filter === 'unread' ? 'sin leer' : ''}</p>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

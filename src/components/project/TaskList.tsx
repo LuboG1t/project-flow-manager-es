@@ -2,12 +2,27 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDown, ChevronRight, Plus, Filter, SortDesc, Milestone, ListFilter, SquarePen } from 'lucide-react';
+import { 
+  ChevronDown, ChevronRight, Plus, Filter, SortDesc, Milestone, 
+  ListFilter, SquarePen, Calendar, CalendarIcon, Edit
+} from 'lucide-react';
 import { TaskDetails } from './TaskDetails';
-import { Avatar } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger 
+} from '@/components/ui/tooltip';
+import { 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator 
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Tipos de datos
 interface Subtask {
@@ -21,6 +36,7 @@ interface Subtask {
   assignedTo: {
     name: string;
     initials: string;
+    avatar?: string;
   };
   timeSpent: string;
 }
@@ -36,6 +52,7 @@ interface Task {
   assignedTo: {
     name: string;
     initials: string;
+    avatar?: string;
   };
   timeSpent: string;
   subtasks?: Subtask[];
@@ -61,12 +78,20 @@ const priorityLabels = {
   'low': 'Baja'
 };
 
+const priorityColors = {
+  'high': 'text-red-500 bg-red-50',
+  'medium': 'text-amber-500 bg-amber-50',
+  'low': 'text-green-500 bg-green-50',
+};
+
 export default function TaskList() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({
     'phase-1': true
   });
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
+  const [editingCell, setEditingCell] = useState<{id: string, field: string} | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
 
   // Mock data
   const phases: Phase[] = [
@@ -77,42 +102,45 @@ export default function TaskList() {
         {
           id: 'task-1',
           name: 'Tarea 1',
-          startDate: '24/03/2025',
-          endDate: '28/03/2025',
+          startDate: '24 abr 2025',
+          endDate: '28 abr 2025',
           duration: '5d',
           status: 'in-review',
           priority: 'high',
           assignedTo: {
             name: 'Mariangel',
-            initials: 'MA'
+            initials: 'MA',
+            avatar: '/avatar-person.jpg'
           },
           timeSpent: '10h/72h',
           subtasks: [
             {
               id: 'subtask-1',
               name: 'Subtarea 1',
-              startDate: '24/03/2025',
-              endDate: '24/03/2025',
+              startDate: '24 abr 2025',
+              endDate: '24 abr 2025',
               duration: '1d',
               status: 'completed',
               priority: 'high',
               assignedTo: {
                 name: 'Mariangel',
-                initials: 'MA'
+                initials: 'MA',
+                avatar: '/avatar-person.jpg'
               },
               timeSpent: '8h/8h'
             },
             {
               id: 'subtask-2',
               name: 'Subtarea 2',
-              startDate: '24/03/2025',
-              endDate: '24/03/2025',
+              startDate: '24 abr 2025',
+              endDate: '24 abr 2025',
               duration: '1d',
               status: 'completed',
               priority: 'high',
               assignedTo: {
                 name: 'Mariangel',
-                initials: 'MA'
+                initials: 'MA',
+                avatar: '/avatar-person.jpg'
               },
               timeSpent: '8h/8h'
             }
@@ -121,42 +149,45 @@ export default function TaskList() {
         {
           id: 'task-2',
           name: 'Sistema de Gestión de Tickets',
-          startDate: '24/03/2025',
-          endDate: '28/03/2025',
+          startDate: '24 abr 2025',
+          endDate: '28 abr 2025',
           duration: '5d',
           status: 'in-review',
           priority: 'high',
           assignedTo: {
             name: 'Mariangel',
-            initials: 'MA'
+            initials: 'MA',
+            avatar: '/avatar-person-2.jpg'
           },
           timeSpent: '10h/72h',
           subtasks: [
             {
               id: 'subtask-3',
               name: 'Subitem',
-              startDate: '20/03/2025',
-              endDate: '20/03/2025',
+              startDate: '20 abr 2025',
+              endDate: '20 abr 2025',
               duration: '1d',
               status: 'completed',
               priority: 'high',
               assignedTo: {
                 name: 'Mariangel',
-                initials: 'MA'
+                initials: 'MA',
+                avatar: '/avatar-person-2.jpg'
               },
               timeSpent: '8h/8h'
             },
             {
               id: 'subtask-4',
               name: 'Another subitem',
-              startDate: '21/03/2025',
-              endDate: '21/03/2025',
+              startDate: '21 abr 2025',
+              endDate: '21 abr 2025',
               duration: '1d',
               status: 'completed',
               priority: 'high',
               assignedTo: {
                 name: 'Mariangel',
-                initials: 'MA'
+                initials: 'MA',
+                avatar: '/avatar-person-2.jpg'
               },
               timeSpent: '8h/8h'
             }
@@ -165,14 +196,15 @@ export default function TaskList() {
         {
           id: 'task-3',
           name: 'Estructura de la página',
-          startDate: '01/04/2025',
-          endDate: '03/04/2025',
+          startDate: '1 abr 2025',
+          endDate: '3 abr 2025',
           duration: '3d',
           status: 'new',
           priority: 'high',
           assignedTo: {
             name: 'Mariangel',
-            initials: 'MA'
+            initials: 'MA',
+            avatar: '/avatar-person-3.jpg'
           },
           timeSpent: '-'
         }
@@ -202,16 +234,13 @@ export default function TaskList() {
     return `status-${status}`;
   };
 
-  const renderPriorityIcon = (priority: Task['priority']) => {
+  const renderPriorityBadge = (priority: Task['priority']) => {
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>
-            <Badge
-              variant="outline"
-              className={`priority-${priority} rounded-md px-1.5 py-0.5`}
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+          <TooltipTrigger asChild>
+            <span className={`inline-flex items-center gap-1.5 ${priorityColors[priority]} px-2 py-1 rounded-md text-xs`}>
+              <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
                 <path
                   d="M12 7.75V12.25M12 16.25V16.26M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                   stroke="currentColor"
@@ -220,7 +249,8 @@ export default function TaskList() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </Badge>
+              <span>{priorityLabels[priority]}</span>
+            </span>
           </TooltipTrigger>
           <TooltipContent>
             <p>Prioridad: {priorityLabels[priority]}</p>
@@ -235,6 +265,153 @@ export default function TaskList() {
       <span className={`task-status-pill ${getStatusClass(status)}`}>
         {statusLabels[status]}
       </span>
+    );
+  };
+  
+  // Funciones para editar celdas
+  const handleStartEdit = (id: string, field: string, initialValue: string) => {
+    setEditingCell({ id, field });
+    setEditValue(initialValue);
+  };
+  
+  const handleSaveEdit = () => {
+    // Aquí iría la lógica para guardar el cambio
+    console.log("Guardar cambio:", editingCell, editValue);
+    setEditingCell(null);
+  };
+  
+  const renderEditableDate = (id: string, date: string, field: string) => {
+    if (editingCell?.id === id && editingCell?.field === field) {
+      return (
+        <div>
+          <Input
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleSaveEdit}
+            onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+            className="h-8 w-full"
+            autoFocus
+          />
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleStartEdit(id, field, date)}>
+        {date}
+        <Edit className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    );
+  };
+  
+  const renderEditableDuration = (id: string, duration: string) => {
+    if (editingCell?.id === id && editingCell?.field === 'duration') {
+      return (
+        <div>
+          <Input
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleSaveEdit}
+            onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+            className="h-8 w-full"
+            autoFocus
+          />
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleStartEdit(id, 'duration', duration)}>
+        {duration}
+        <Edit className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    );
+  };
+  
+  const renderEditableStatus = (id: string, status: Task['status']) => {
+    if (editingCell?.id === id && editingCell?.field === 'status') {
+      return (
+        <Select 
+          defaultValue={status} 
+          onValueChange={(value) => {
+            setEditValue(value);
+            setTimeout(handleSaveEdit, 0);
+          }}
+        >
+          <SelectTrigger className="w-full h-8">
+            <SelectValue placeholder="Seleccionar estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="new">Nuevo</SelectItem>
+            <SelectItem value="in-progress">En progreso</SelectItem>
+            <SelectItem value="in-review">En revisión</SelectItem>
+            <SelectItem value="completed">Completado</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    }
+    return (
+      <div className="cursor-pointer" onClick={() => handleStartEdit(id, 'status', status)}>
+        {renderStatusBadge(status)}
+      </div>
+    );
+  };
+  
+  const renderEditablePriority = (id: string, priority: Task['priority']) => {
+    if (editingCell?.id === id && editingCell?.field === 'priority') {
+      return (
+        <Select 
+          defaultValue={priority} 
+          onValueChange={(value) => {
+            setEditValue(value);
+            setTimeout(handleSaveEdit, 0);
+          }}
+        >
+          <SelectTrigger className="w-full h-8">
+            <SelectValue placeholder="Seleccionar prioridad" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Baja</SelectItem>
+            <SelectItem value="medium">Media</SelectItem>
+            <SelectItem value="high">Alta</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    }
+    return (
+      <div className="cursor-pointer" onClick={() => handleStartEdit(id, 'priority', priority)}>
+        {renderPriorityBadge(priority)}
+      </div>
+    );
+  };
+  
+  const renderEditableTime = (id: string, timeSpent: string) => {
+    if (timeSpent === '-') return <span className="text-muted-foreground">-</span>;
+    
+    if (editingCell?.id === id && editingCell?.field === 'time') {
+      return (
+        <div>
+          <Input
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleSaveEdit}
+            onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+            className="h-8 w-full"
+            autoFocus
+          />
+        </div>
+      );
+    }
+    
+    const [spent, total] = timeSpent.split('/');
+    const isComplete = spent === total;
+    
+    return (
+      <div 
+        className={`flex items-center gap-1 cursor-pointer ${isComplete ? 'text-green-600' : 'text-red-600'}`}
+        onClick={() => handleStartEdit(id, 'time', timeSpent)}
+      >
+        {timeSpent}
+        <Edit className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
     );
   };
 
@@ -276,14 +453,61 @@ export default function TaskList() {
           </DropdownMenu>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <Filter className="h-4 w-4" />
-              Filtrar
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <SortDesc className="h-4 w-4" />
-              Ordenar
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Filter className="h-4 w-4" />
+                  Filtrar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  Estado
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Prioridad
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Asignado a
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Fecha
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <SortDesc className="h-4 w-4" />
+                  Ordenar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  Nombre (A-Z)
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Nombre (Z-A)
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Fecha de inicio (más reciente)
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Fecha de inicio (más antigua)
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Fecha de vencimiento (más cercana)
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Prioridad (alta a baja)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -321,7 +545,7 @@ export default function TaskList() {
                 {expandedPhases[phase.id] && phase.tasks.map((task) => (
                   <React.Fragment key={task.id}>
                     <TableRow 
-                      className={`hover:bg-muted/40 ${selectedTaskId === task.id ? 'bg-muted/60' : ''} group`}
+                      className={`hover:bg-muted/40 group ${selectedTaskId === task.id ? 'bg-muted/60' : ''}`}
                     >
                       <TableCell className="font-medium flex items-center gap-2">
                         {task.subtasks && (
@@ -343,30 +567,37 @@ export default function TaskList() {
                           {task.name}
                         </button>
                       </TableCell>
-                      <TableCell>{task.startDate}</TableCell>
-                      <TableCell>{task.endDate}</TableCell>
-                      <TableCell>{task.duration}</TableCell>
-                      <TableCell>{renderStatusBadge(task.status)}</TableCell>
-                      <TableCell>{renderPriorityIcon(task.priority)}</TableCell>
-                      <TableCell>
-                        <Avatar className="h-7 w-7 bg-primary">
-                          <span className="text-xs">{task.assignedTo.initials}</span>
-                        </Avatar>
+                      <TableCell className="group">
+                        {renderEditableDate(task.id, task.startDate, 'startDate')}
+                      </TableCell>
+                      <TableCell className="group">
+                        {renderEditableDate(task.id, task.endDate, 'endDate')}
+                      </TableCell>
+                      <TableCell className="group">
+                        {renderEditableDuration(task.id, task.duration)}
                       </TableCell>
                       <TableCell>
-                        <span className={task.timeSpent === '-' ? 'text-muted-foreground' : 
-                          task.timeSpent.split('/')[0] === task.timeSpent.split('/')[1] ? 'text-green-600' : 'text-red-600'
-                        }>
-                          {task.timeSpent}
-                        </span>
+                        {renderEditableStatus(task.id, task.status)}
+                      </TableCell>
+                      <TableCell>
+                        {renderEditablePriority(task.id, task.priority)}
+                      </TableCell>
+                      <TableCell>
+                        <Avatar className="h-7 w-7">
+                          <AvatarImage src={task.assignedTo.avatar} />
+                          <AvatarFallback>{task.assignedTo.initials}</AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell className="group">
+                        {renderEditableTime(task.id, task.timeSpent)}
                       </TableCell>
                     </TableRow>
                     {expandedTasks[task.id] && task.subtasks?.map((subtask) => (
                       <TableRow 
                         key={subtask.id}
-                        className={`hover:bg-muted/30 ${selectedTaskId === subtask.id ? 'bg-muted/40' : ''}`}
+                        className={`hover:bg-muted/30 group ${selectedTaskId === subtask.id ? 'bg-muted/40' : ''}`}
                       >
-                        <TableCell className="font-normal pl-10">
+                        <TableCell className="font-normal pl-12">
                           <button
                             onClick={() => handleTaskClick(subtask.id)}
                             className="hover:underline"
@@ -374,22 +605,29 @@ export default function TaskList() {
                             {subtask.name}
                           </button>
                         </TableCell>
-                        <TableCell>{subtask.startDate}</TableCell>
-                        <TableCell>{subtask.endDate}</TableCell>
-                        <TableCell>{subtask.duration}</TableCell>
-                        <TableCell>{renderStatusBadge(subtask.status)}</TableCell>
-                        <TableCell>{renderPriorityIcon(subtask.priority)}</TableCell>
-                        <TableCell>
-                          <Avatar className="h-7 w-7 bg-primary">
-                            <span className="text-xs">{subtask.assignedTo.initials}</span>
-                          </Avatar>
+                        <TableCell className="group">
+                          {renderEditableDate(subtask.id, subtask.startDate, 'startDate')}
+                        </TableCell>
+                        <TableCell className="group">
+                          {renderEditableDate(subtask.id, subtask.endDate, 'endDate')}
+                        </TableCell>
+                        <TableCell className="group">
+                          {renderEditableDuration(subtask.id, subtask.duration)}
                         </TableCell>
                         <TableCell>
-                          <span className={subtask.timeSpent === '-' ? 'text-muted-foreground' : 
-                            subtask.timeSpent.split('/')[0] === subtask.timeSpent.split('/')[1] ? 'text-green-600' : 'text-red-600'
-                          }>
-                            {subtask.timeSpent}
-                          </span>
+                          {renderEditableStatus(subtask.id, subtask.status)}
+                        </TableCell>
+                        <TableCell>
+                          {renderEditablePriority(subtask.id, subtask.priority)}
+                        </TableCell>
+                        <TableCell>
+                          <Avatar className="h-7 w-7">
+                            <AvatarImage src={subtask.assignedTo.avatar} />
+                            <AvatarFallback>{subtask.assignedTo.initials}</AvatarFallback>
+                          </Avatar>
+                        </TableCell>
+                        <TableCell className="group">
+                          {renderEditableTime(subtask.id, subtask.timeSpent)}
                         </TableCell>
                       </TableRow>
                     ))}
