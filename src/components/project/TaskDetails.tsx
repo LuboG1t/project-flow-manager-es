@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Calendar, Clock, ChevronDown, CheckCircle, Circle, Upload, Paperclip, Link, ArrowRight, Play, MessageSquare } from 'lucide-react';
+import { X, Calendar, Clock, ChevronDown, CheckCircle, Circle, Upload, Paperclip, Link, ArrowRight, Play, MessageSquare, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
