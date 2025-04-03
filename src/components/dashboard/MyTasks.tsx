@@ -33,7 +33,8 @@ const priorityLabels = {
 export default function MyTasks() {
   const [currentDate, setCurrentDate] = useState('24/03/2025');
   
-  const taskGroups = {
+  // Properly typed task groups
+  const taskGroups: Record<string, Task[]> = {
     daily: [
       {
         id: 'task-1',
@@ -201,7 +202,7 @@ export default function MyTasks() {
         <div className="flex items-center gap-2">
           <div className="flex items-center border rounded-md overflow-hidden">
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-none">
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeftIcon className="h-4 w-4" />
             </Button>
             <Button variant="ghost" className="h-9 px-2 rounded-none flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
@@ -232,8 +233,8 @@ export default function MyTasks() {
   );
 }
 
-// Helper component for the code example
-const ChevronLeft = ({ className }: { className?: string }) => (
+// Renamed the component to avoid the conflict with the imported ChevronRight
+const ChevronLeftIcon = ({ className }: { className?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -250,19 +251,20 @@ const ChevronLeft = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const ChevronRight = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
+// We no longer need this as we're using the lucide-react component
+// const ChevronRightIcon = ({ className }: { className?: string }) => (
+//   <svg
+//     xmlns="http://www.w3.org/2000/svg"
+//     width="24"
+//     height="24"
+//     viewBox="0 0 24 24"
+//     fill="none"
+//     stroke="currentColor"
+//     strokeWidth="2"
+//     strokeLinecap="round"
+//     strokeLinejoin="round"
+//     className={className}
+//   >
+//     <path d="M9 18l6-6-6-6" />
+//   </svg>
+// );
