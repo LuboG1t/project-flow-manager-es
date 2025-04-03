@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Calendar, CheckSquare, ChevronDown, ChevronRight, Clock, FolderKanban, 
-  Layers, MoreHorizontal, Plus, Settings, Bell, LogOut
+  Layers, MoreHorizontal, Plus, Settings, Bell, LogOut, Users, Building2, Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -41,12 +41,16 @@ const CollapsibleGroup = ({
   label, 
   children, 
   defaultOpen = false,
-  count
+  count,
+  icon: Icon,
+  color = 'bg-primary'
 }: { 
   label: string; 
   children: React.ReactNode;
   defaultOpen?: boolean;
   count?: number;
+  icon?: React.ElementType;
+  color?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
@@ -56,7 +60,8 @@ const CollapsibleGroup = ({
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-sidebar-foreground"
       >
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-2">
+          {Icon && <Icon className="w-4 h-4 text-sidebar-foreground/70" />}
           {label}
           {count !== undefined && (
             <span className="ml-1 text-xs text-muted-foreground">({count})</span>
@@ -75,7 +80,7 @@ const CollapsibleGroup = ({
   );
 };
 
-const ProjectItem = ({ name, id }: { name: string; id: string }) => {
+const ProjectItem = ({ name, id, color = 'bg-primary' }: { name: string; id: string; color?: string; }) => {
   return (
     <NavLink 
       to={`/proyectos/${id}`}
@@ -84,7 +89,7 @@ const ProjectItem = ({ name, id }: { name: string; id: string }) => {
         isActive ? 'bg-sidebar-accent/50 text-sidebar-accent-foreground' : 'text-sidebar-foreground'
       )}
     >
-      <span className="w-2 h-2 rounded-full bg-primary" />
+      <span className={`w-2 h-2 rounded-full ${color}`} />
       <span className="truncate">{name}</span>
     </NavLink>
   );
@@ -120,17 +125,44 @@ export function AppSidebar() {
           </Button>
         </div>
         
-        <CollapsibleGroup label="Tareas sin proyecto asignado" defaultOpen={true}>
+        <CollapsibleGroup 
+          label="Tareas sin proyecto asignado" 
+          defaultOpen={true}
+          icon={FolderKanban}
+        >
+          <NavLink to="/tareas-sin-proyecto" className="w-full text-left text-xs flex items-center gap-1 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent hover:text-accent-foreground">
+            <span className="inline-block">Ver todas las tareas</span>
+          </NavLink>
           <Button variant="ghost" size="sm" className="w-full justify-start text-xs">
             <Plus className="mr-1 h-3.5 w-3.5" />
             Agregar tarea
           </Button>
         </CollapsibleGroup>
 
-        <CollapsibleGroup label="Equipo de Desarrollo" count={2} defaultOpen={true}>
-          <CollapsibleGroup label="Portafolio 1" count={2}>
-            <ProjectItem name="Proyecto 1A" id="1a" />
-            <ProjectItem name="Proyecto 1B" id="1b" />
+        <CollapsibleGroup 
+          label="Equipo de Desarrollo" 
+          count={2} 
+          defaultOpen={true}
+          icon={Users}
+          color="bg-blue-500"
+        >
+          <NavLink to="/equipos/desarrollo" className="w-full text-left text-xs flex items-center gap-1 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent hover:text-accent-foreground">
+            <Building2 className="h-3.5 w-3.5 mr-1" />
+            <span className="inline-block">Dashboard de equipo</span>
+          </NavLink>
+          
+          <CollapsibleGroup 
+            label="Portafolio 1" 
+            count={2}
+            icon={Briefcase}
+            color="bg-purple-500"
+          >
+            <NavLink to="/portfolios/1" className="w-full text-left text-xs flex items-center gap-1 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent hover:text-accent-foreground">
+              <span className="inline-block">Dashboard de portafolio</span>
+            </NavLink>
+            
+            <ProjectItem name="Proyecto 1A" id="1a" color="bg-green-500" />
+            <ProjectItem name="Proyecto 1B" id="1b" color="bg-yellow-500" />
           </CollapsibleGroup>
         </CollapsibleGroup>
       </div>

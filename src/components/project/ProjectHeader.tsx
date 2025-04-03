@@ -16,7 +16,6 @@ interface ProjectHeaderProps {
     endDate: string;
     team: string;
     portfolio: string;
-    isPublic?: boolean;
   };
   activeView: 'list' | 'kanban' | 'gantt' | 'workload';
   onChangeView: (view: 'list' | 'kanban' | 'gantt' | 'workload') => void;
@@ -34,15 +33,8 @@ export default function ProjectHeader({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Público</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="#">{`Lista en `}</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="#">
-                  <div className="bg-purple-100 text-purple-800 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium">
+                <BreadcrumbLink href="/equipos/desarrollo">
+                  <div className="bg-blue-100 text-blue-800 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium">
                     <Users size={12} />
                     <span>{project.team}</span>
                   </div>
@@ -50,7 +42,12 @@ export default function ProjectHeader({
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="#">{project.portfolio}</BreadcrumbLink>
+                <BreadcrumbLink href="/portfolios/1">
+                  <div className="bg-purple-100 text-purple-800 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium">
+                    <Briefcase size={12} />
+                    <span>{project.portfolio}</span>
+                  </div>
+                </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -60,11 +57,6 @@ export default function ProjectHeader({
             <Badge variant="outline" className="text-xs">
               {project.startDate} - {project.endDate}
             </Badge>
-            {project.isPublic && (
-              <Badge variant="secondary" className="text-xs">
-                Público
-              </Badge>
-            )}
           </div>
         </div>
 
