@@ -1,12 +1,6 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import Layout from '../components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   XAxis,
@@ -15,500 +9,361 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ComposedChart,
+  PieChart,
+  Pie,
   Cell,
 } from 'recharts';
-import {
-  Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Users,
-  CalendarDays,
-  BarChart3,
-  PlusCircle,
-  Filter,
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Users, TrendingUp, Briefcase, Clock, Calendar, 
+  CheckSquare, XCircle, AlertTriangle, Trophy
 } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import { AvatarGroup } from '@/components/ui/avatar-group';
-import { Badge } from '@/components/ui/badge';
-import { GanttChart } from '@/components/project/GanttChart';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-interface ProjectProgress {
-  id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  progress: number;
-  status: 'on-track' | 'at-risk' | 'delayed';
-  tasks: {
-    total: number;
-    completed: number;
-    inProgress: number;
-    delayed: number;
-  };
-  team: {
-    lead: {
-      name: string;
-      initials: string;
-    };
-    members: number;
-  };
-}
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import GanttChart from '@/components/project/GanttChart';
 
 export default function PortfolioDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'gantt'>('overview');
-  
-  // Sample data
-  const projects: ProjectProgress[] = [
-    {
-      id: '1a',
-      name: 'Proyecto 1A',
-      startDate: '02/03/2025',
-      endDate: '22/05/2025',
-      progress: 65,
-      status: 'on-track',
-      tasks: {
-        total: 43,
-        completed: 28,
-        inProgress: 12,
-        delayed: 3,
-      },
-      team: {
-        lead: {
-          name: 'Alejandro S.',
-          initials: 'AS',
-        },
-        members: 5,
-      },
-    },
-    {
-      id: '1b',
-      name: 'Proyecto 1B',
-      startDate: '20/02/2025',
-      endDate: '15/04/2025',
-      progress: 45,
-      status: 'at-risk',
-      tasks: {
-        total: 35,
-        completed: 15,
-        inProgress: 15,
-        delayed: 5,
-      },
-      team: {
-        lead: {
-          name: 'Carlos P.',
-          initials: 'CP',
-        },
-        members: 4,
-      },
-    },
-    {
-      id: '1c',
-      name: 'Proyecto 1C',
-      startDate: '15/01/2025',
-      endDate: '10/06/2025',
-      progress: 25,
-      status: 'delayed',
-      tasks: {
-        total: 50,
-        completed: 10,
-        inProgress: 25,
-        delayed: 15,
-      },
-      team: {
-        lead: {
-          name: 'Mariangel',
-          initials: 'MA',
-        },
-        members: 7,
-      },
-    },
-    {
-      id: '1d',
-      name: 'Proyecto 1D',
-      startDate: '01/04/2025',
-      endDate: '30/08/2025',
-      progress: 5,
-      status: 'on-track',
-      tasks: {
-        total: 60,
-        completed: 3,
-        inProgress: 5,
-        delayed: 0,
-      },
-      team: {
-        lead: {
-          name: 'Guillermo V.',
-          initials: 'GV',
-        },
-        members: 3,
-      },
-    },
+  // Sample data for charts
+  const projectStatusData = [
+    { name: 'En tiempo', value: 5, color: '#10b981' },
+    { name: 'En riesgo', value: 2, color: '#f59e0b' },
+    { name: 'Con retraso', value: 1, color: '#ef4444' },
   ];
 
-  // Charts data
-  const progressChartData = [
-    {
-      month: 'Ene',
-      planned: 10,
-      actual: 8,
-    },
-    {
-      month: 'Feb',
-      planned: 25,
-      actual: 20,
-    },
-    {
-      month: 'Mar',
-      planned: 40,
-      actual: 30,
-    },
-    {
-      month: 'Abr',
-      planned: 60,
-      actual: 45,
-    },
-    {
-      month: 'May',
-      planned: 85,
-      actual: 65,
-    },
+  const workloadData = [
+    { name: 'Ana M.', assigned: 42, completed: 30 },
+    { name: 'Guillermo V.', assigned: 28, completed: 19 },
+    { name: 'Mariangel', assigned: 38, completed: 35 },
+    { name: 'Carlos P.', assigned: 24, completed: 20 },
+    { name: 'Luis R.', assigned: 32, completed: 18 },
   ];
 
-  const resourcesData = [
-    { name: 'Desarrollo', planned: 80, actual: 65 },
-    { name: 'Diseño', planned: 60, actual: 55 },
-    { name: 'QA', planned: 40, actual: 30 },
-    { name: 'DevOps', planned: 30, actual: 25 },
-    { name: 'Management', planned: 20, actual: 20 },
+  const teamMembers = [
+    { name: 'Ana M.', role: 'Diseñador UI/UX', initials: 'AM', tasks: 12, completed: 9 },
+    { name: 'Guillermo V.', role: 'Desarrollador Frontend', initials: 'GV', tasks: 15, completed: 10 },
+    { name: 'Mariangel', role: 'Desarrollador Backend', initials: 'MA', tasks: 18, completed: 16 },
+    { name: 'Carlos P.', role: 'QA Tester', initials: 'CP', tasks: 14, completed: 12 },
+    { name: 'Luis R.', role: 'DevOps Engineer', initials: 'LR', tasks: 10, completed: 6 },
   ];
 
-  const statusColorMap = {
-    'on-track': 'text-green-600',
-    'at-risk': 'text-yellow-600',
-    'delayed': 'text-red-600',
-  };
+  const upcomingEvents = [
+    { id: '1', title: 'Reunión de planificación semanal', date: '05/04/2025', time: '10:00 AM', participants: 8 },
+    { id: '2', title: 'Demo de producto', date: '08/04/2025', time: '2:00 PM', participants: 12 },
+    { id: '3', title: 'Revisión de sprint', date: '10/04/2025', time: '11:30 AM', participants: 10 },
+  ];
 
-  const statusIconMap = {
-    'on-track': CheckCircle,
-    'at-risk': AlertTriangle,
-    'delayed': XCircle,
-  };
+  const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
-  const statusTextMap = {
-    'on-track': 'En tiempo',
-    'at-risk': 'En riesgo',
-    'delayed': 'Con retraso',
-  };
-
-  const getStatusComponent = (status: 'on-track' | 'at-risk' | 'delayed') => {
-    const Icon = statusIconMap[status];
-    return (
-      <div className={`flex items-center gap-1.5 ${statusColorMap[status]}`}>
-        <Icon className="h-4 w-4" />
-        <span>{statusTextMap[status]}</span>
-      </div>
-    );
-  };
+  const tasks = [
+    { id: '1', name: 'Task 1', start: '01/04/2025', end: '10/04/2025', progress: 60 },
+    { id: '2', name: 'Task 2', start: '05/04/2025', end: '15/04/2025', progress: 30 },
+    { id: '3', name: 'Task 3', start: '12/04/2025', end: '22/04/2025', progress: 80 },
+  ];
 
   return (
     <Layout>
       <div className="container py-6 max-w-7xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Portafolio 1</h1>
-            <p className="text-muted-foreground">Vista general de los proyectos del portafolio</p>
+            <h1 className="text-2xl font-bold">Dashboard del Portafolio</h1>
+            <p className="text-muted-foreground">Rendimiento y estado general del portafolio</p>
           </div>
           
-          <div className="flex items-center gap-3">
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+          <div className="flex items-center gap-2">
+            <Tabs defaultValue="month">
               <TabsList>
-                <TabsTrigger value="overview">Vista general</TabsTrigger>
-                <TabsTrigger value="gantt">Gantt</TabsTrigger>
+                <TabsTrigger value="week">Semana</TabsTrigger>
+                <TabsTrigger value="month">Mes</TabsTrigger>
+                <TabsTrigger value="quarter">Trimestre</TabsTrigger>
               </TabsList>
             </Tabs>
-            
-            <Button className="gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Nuevo proyecto
-            </Button>
           </div>
         </div>
-        
-        {activeTab === 'overview' ? (
-          <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Proyectos</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">4</div>
-                  <div className="flex items-center pt-1">
-                    <ArrowUpRight className="mr-1 h-4 w-4 text-emerald-500" />
-                    <span className="text-xs text-emerald-500">+1 este trimestre</span>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Tareas totales</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">188</div>
-                  <div className="flex items-center pt-1">
-                    <span className="text-xs text-muted-foreground">56 completadas (29.8%)</span>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Miembros del equipo</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">12</div>
-                  <div className="flex items-center pt-1">
-                    <ArrowUpRight className="mr-1 h-4 w-4 text-emerald-500" />
-                    <span className="text-xs text-emerald-500">+2 este mes</span>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Tareas con retraso</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">23</div>
-                  <div className="flex items-center pt-1">
-                    <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
-                    <span className="text-xs text-red-500">+5 esta semana</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Charts */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Progreso del portafolio</CardTitle>
-                  <CardDescription>Progreso planeado vs. actual</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={progressChartData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line
-                          type="monotone"
-                          dataKey="planned"
-                          name="Progreso planeado"
-                          stroke="#8884d8"
-                          strokeWidth={2}
-                          activeDot={{ r: 8 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="actual"
-                          name="Progreso actual"
-                          stroke="#82ca9d"
-                          strokeWidth={2}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Utilización de recursos</CardTitle>
-                  <CardDescription>Recursos planeados vs. utilizados por departamento</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart
-                        layout="vertical"
-                        data={resourcesData}
-                        margin={{
-                          top: 20,
-                          right: 20,
-                          bottom: 20,
-                          left: 70,
-                        }}
-                      >
-                        <CartesianGrid stroke="#f5f5f5" />
-                        <XAxis type="number" />
-                        <YAxis dataKey="name" type="category" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar
-                          dataKey="planned"
-                          name="Horas planificadas"
-                          stackId="a"
-                          fill="#8884d8"
-                          barSize={20}
-                        />
-                        <Bar
-                          dataKey="actual"
-                          name="Horas actuales"
-                          stackId="a"
-                          fill="#82ca9d"
-                          barSize={20}
-                        />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Projects Table */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Proyectos activos</CardTitle>
-                    <CardDescription>Estado y progreso de los proyectos en el portafolio</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <Filter className="h-4 w-4" />
-                    Filtrar
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Proyecto</TableHead>
-                      <TableHead>Líder</TableHead>
-                      <TableHead>Fechas</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Tareas</TableHead>
-                      <TableHead>Progreso</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {projects.map((project) => (
-                      <TableRow key={project.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${
-                              project.status === 'on-track' ? 'bg-green-500' :
-                              project.status === 'at-risk' ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}></span>
-                            {project.name}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-7 w-7">
-                              <span className="text-xs">{project.team.lead.initials}</span>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm">{project.team.lead.name}</p>
-                              <p className="text-xs text-muted-foreground">{project.team.members} miembros</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col text-sm">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span>{project.startDate} - {project.endDate}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {getStatusComponent(project.status)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            <div className="flex items-center gap-1 mb-0.5">
-                              <CheckCircle className="h-3.5 w-3.5 text-green-500" />
-                              <span>{project.tasks.completed}/{project.tasks.total} completadas</span>
-                            </div>
-                            {project.tasks.delayed > 0 && (
-                              <div className="flex items-center gap-1">
-                                <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
-                                <span>{project.tasks.delayed} con retraso</span>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="w-full space-y-1">
-                            <div className="flex items-center justify-between text-sm">
-                              <span>{project.progress}%</span>
-                            </div>
-                            <Progress 
-                              value={project.progress} 
-                              className="h-2"
-                              indicatorClassName={
-                                project.status === 'on-track' ? 'bg-green-500' :
-                                project.status === 'at-risk' ? 'bg-yellow-500' : 'bg-red-500'
-                              }
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </>
-        ) : (
+
+        {/* Stats cards */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Planificación de proyectos</CardTitle>
-              <CardDescription>Vista Gantt de todos los proyectos en el portafolio</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Miembros del Equipo</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="h-[600px]">
-                {/* Placeholder for Gantt Chart - this would be a more complex component */}
-                <div className="border p-6 h-full bg-muted/10 flex items-center justify-center">
-                  <div className="text-center">
-                    <CalendarDays className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                    <h3 className="text-lg font-medium">Vista Gantt del Portafolio</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Aquí se mostraría una vista Gantt de todos los proyectos en el portafolio,
-                      <br />con sus fases, tareas y dependencias.
-                    </p>
-                  </div>
+              <div className="text-2xl font-bold">8</div>
+              <p className="text-xs text-muted-foreground">
+                2 nuevos este mes
+              </p>
+              <AvatarGroup className="mt-3 justify-start">
+                {teamMembers.slice(0, 5).map((member, i) => (
+                  <Avatar key={i} className="border-background">
+                    <span>{member.initials}</span>
+                  </Avatar>
+                ))}
+                <Avatar className="bg-muted text-muted-foreground border-background">
+                  <span>+3</span>
+                </Avatar>
+              </AvatarGroup>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Proyectos Activos</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">3</div>
+              <p className="text-xs text-muted-foreground">
+                8 proyectos en total
+              </p>
+              <div className="mt-3 space-y-1.5">
+                <div className="flex items-center">
+                  <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                  <span className="text-sm">Proyecto 1A (4 tareas)</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
+                  <span className="text-sm">Proyecto 1B (3 tareas)</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="h-2 w-2 rounded-full bg-purple-500 mr-2"></span>
+                  <span className="text-sm">Proyecto 1C (1 tarea)</span>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )}
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Horas Registradas</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">186</div>
+              <p className="text-xs text-muted-foreground">
+                +12% respecto al mes anterior
+              </p>
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span>Objetivo mensual</span>
+                  <span className="font-medium">186/200 horas</span>
+                </div>
+                <Progress value={93} className="h-2" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Eficiencia</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">87%</div>
+              <p className="text-xs text-muted-foreground">
+                +5% respecto al mes anterior
+              </p>
+              <div className="mt-3 w-full bg-muted rounded-full h-3">
+                <div
+                  className="bg-primary h-3 rounded-full"
+                  style={{ width: '87%' }}
+                ></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Estado de los proyectos</CardTitle>
+              <CardDescription>Distribución de proyectos por estado</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={projectStatusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={90}
+                      paddingAngle={5}
+                      dataKey="value"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {projectStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Carga de trabajo del equipo</CardTitle>
+              <CardDescription>Tareas asignadas vs. completadas por miembro</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={workloadData}
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="assigned" name="Tareas asignadas" fill="#93c5fd" />
+                    <Bar dataKey="completed" name="Tareas completadas" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Gantt Chart */}
+        <div className="mb-6">
+          <GanttChart tasks={tasks} title="Planificación del Portafolio" />
+        </div>
+
+        {/* Team members and upcoming events */}
+        <div className="grid grid-cols-3 gap-6 mb-6">
+          <Card className="col-span-2">
+            <CardHeader>
+              <CardTitle>Rendimiento del equipo</CardTitle>
+              <CardDescription>Resumen de actividad por miembro</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-5">
+                {teamMembers.map((member, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10 border-2 border-primary/10">
+                      <span>{member.initials}</span>
+                    </Avatar>
+                    <div className="flex-1 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">{member.role}</p>
+                        </div>
+                        <div className="text-sm">
+                          {member.completed}/{member.tasks} tareas
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 w-full">
+                        <Progress 
+                          value={(member.completed / member.tasks) * 100} 
+                          className="h-2 flex-1"
+                        />
+                        <span className="text-xs font-medium">{Math.round((member.completed / member.tasks) * 100)}%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      {member.completed / member.tasks > 0.8 ? (
+                        <Trophy className="h-5 w-5 text-amber-500" />
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Próximos eventos</CardTitle>
+              <CardDescription>Reuniones y fechas importantes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {upcomingEvents.map((event) => (
+                  <div key={event.id} className="border-b pb-4 last:border-0 last:pb-0">
+                    <p className="font-medium">{event.title}</p>
+                    <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span>{event.date}</span>
+                      <span>•</span>
+                      <Clock className="h-4 w-4" />
+                      <span>{event.time}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <AvatarGroup className="justify-start -space-x-2">
+                        {[...Array(4)].map((_, i) => (
+                          <Avatar key={i} className="h-6 w-6 border-background">
+                            <span className="text-[10px]">U{i+1}</span>
+                          </Avatar>
+                        ))}
+                      </AvatarGroup>
+                      {event.participants > 4 && (
+                        <span className="text-xs text-muted-foreground">+{event.participants - 4} más</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Status summary */}
+        <div className="grid grid-cols-3 gap-4">
+          <Card className="bg-green-50 border-green-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-green-800 flex items-center gap-2">
+                <CheckSquare className="h-4 w-4" />
+                Tareas completadas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-800">72</div>
+              <p className="text-xs text-green-700">+8% respecto a la semana pasada</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-amber-50 border-amber-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-amber-800 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Tareas en riesgo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-amber-800">15</div>
+              <p className="text-xs text-amber-700">-3% respecto a la semana pasada</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-red-50 border-red-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-red-800 flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                Tareas con retraso
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-800">7</div>
+              <p className="text-xs text-red-700">+2 desde la semana pasada</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </Layout>
   );

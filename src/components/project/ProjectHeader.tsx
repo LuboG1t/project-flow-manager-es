@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ListTodo, KanbanSquare, GanttChart, BarChart4, Calendar, Users, Share2 } from 'lucide-react';
+import { ListTodo, KanbanSquare, GanttChart, BarChart4, Calendar, Users, Share2, Briefcase } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
