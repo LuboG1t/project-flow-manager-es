@@ -1,251 +1,184 @@
 
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { 
-  Calendar, CheckSquare, ChevronDown, ChevronRight, Clock, FolderKanban, 
-  Layers, MoreHorizontal, Plus, Settings, Bell, LogOut, Users, Building2, Briefcase, 
-  FolderPlus, UserPlus
-} from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ChevronRight, ChevronDown, Plus, LayoutDashboard, Calendar, Inbox, CheckSquare, Users, ListChecks, FileCog, Clock, BellRing, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Avatar } from '@/components/ui/avatar';
-import Logo from '../Logo';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Logo } from '../Logo';
 
-type NavItemProps = {
-  icon: React.ElementType;
-  label: string;
-  to: string;
-  count?: number;
-};
-
-const NavItem = ({ icon: Icon, label, to, count }: NavItemProps) => {
-  return (
-    <NavLink 
-      to={to} 
-      className={({ isActive }) => cn(
-        'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-sidebar-accent',
-        isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground'
-      )}
-    >
-      <Icon className="w-5 h-5" />
-      <span className="flex-1">{label}</span>
-      {count !== undefined && (
-        <span className="bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full">
-          {count}
-        </span>
-      )}
-    </NavLink>
-  );
-};
-
-const CollapsibleGroup = ({ 
-  label, 
-  children, 
-  defaultOpen = false,
-  count,
-  icon: Icon,
-  color = 'bg-primary',
-  directLink,
-  addAction
-}: { 
-  label: string; 
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-  count?: number;
-  icon?: React.ElementType;
-  color?: string;
-  directLink?: string;
-  addAction?: () => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const navigate = useNavigate();
+export default function AppSidebar() {
+  const location = useLocation();
+  const [expanded, setExpanded] = useState({
+    'desarrollo': true,
+    'portfolio-1': false
+  });
   
-  const handleGroupClick = () => {
-    if (directLink) {
-      navigate(directLink);
-    } else {
-      setIsOpen(!isOpen);
-    }
+  const toggleExpand = (key: string) => {
+    setExpanded(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
-  
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <button 
-          onClick={handleGroupClick}
-          className="flex flex-1 items-center justify-between px-3 py-2 text-sm font-medium text-sidebar-foreground"
-        >
-          <span className="flex items-center gap-2">
-            {Icon && <Icon className="w-4 h-4 text-sidebar-foreground/70" />}
-            {label}
-            {count !== undefined && (
-              <span className="ml-1 text-xs text-muted-foreground">({count})</span>
-            )}
-          </span>
-          <ChevronRight className={cn("w-4 h-4 text-sidebar-foreground/50 transition-transform", isOpen && "rotate-90")} />
-        </button>
-        {addAction && (
-          <Button variant="ghost" size="icon" className="h-7 w-7 mr-2" onClick={(e) => {
-            e.stopPropagation();
-            addAction();
-          }}>
-            <Plus className="h-3.5 w-3.5" />
-          </Button>
-        )}
-      </div>
-      <div className={cn("space-y-1 pl-3", !isOpen && "hidden")}>
-        {children}
-      </div>
-    </div>
-  );
-};
 
-const ProjectItem = ({ name, id, color = 'bg-primary' }: { name: string; id: string; color?: string; }) => {
   return (
-    <NavLink 
-      to={`/proyectos/${id}`}
-      className={({ isActive }) => cn(
-        'flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-        isActive ? 'bg-sidebar-accent/50 text-sidebar-accent-foreground' : 'text-sidebar-foreground'
-      )}
-    >
-      <span className={`w-2 h-2 rounded-full ${color}`} />
-      <span className="truncate">{name}</span>
-    </NavLink>
-  );
-};
-
-export function AppSidebar() {
-  const [showSpaceDropdown, setShowSpaceDropdown] = useState(false);
-  const navigate = useNavigate();
-  
-  const handleNewSpace = () => {
-    setShowSpaceDropdown(true);
-  };
-  
-  const handleNewPortfolio = () => {
-    // Lógica para crear nuevo portafolio
-    console.log("Crear nuevo portafolio");
-  };
-  
-  const handleNewProject = () => {
-    // Lógica para crear nuevo proyecto
-    console.log("Crear nuevo proyecto");
-  };
-  
-  return (
-    <div className="min-h-screen w-64 border-r bg-sidebar flex flex-col">
-      <div className="px-4 py-5 flex items-center justify-between">
+    <div className="min-h-screen w-64 border-r bg-background flex flex-col">
+      <div className="p-4 border-b flex items-center justify-between">
         <Logo />
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Settings className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
-
-      <div className="px-2 py-2 space-y-1">
-        <NavItem icon={CheckSquare} label="Mis tareas" to="/mis-tareas" />
-        <NavItem icon={Bell} label="Notificaciones" to="/notificaciones" count={3} />
-        <NavItem icon={Clock} label="TimeSheet" to="/timesheet" />
-        <NavItem icon={Calendar} label="Aprobaciones" to="/aprobaciones" count={2} />
-      </div>
-
-      <div className="px-2 pt-4 pb-2 flex-1 overflow-y-auto">
-        <div className="px-3 mb-2 flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Espacios</h3>
-          <DropdownMenu open={showSpaceDropdown} onOpenChange={setShowSpaceDropdown}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleNewSpace}>
-                <Plus className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => console.log("Nueva área de trabajo")}>
-                <Building2 className="mr-2 h-4 w-4" />
-                <span>Nueva área de trabajo</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleNewPortfolio}>
-                <Briefcase className="mr-2 h-4 w-4" />
-                <span>Nuevo portafolio</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleNewProject}>
-                <FolderPlus className="mr-2 h-4 w-4" />
-                <span>Nuevo proyecto</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      
+      <div className="flex-1 overflow-auto py-2">
+        <nav className="px-2 space-y-1">
+          <Link to="/mis-tareas" className={cn(
+            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+            location.pathname === "/mis-tareas" 
+              ? "bg-primary/10 text-primary font-medium"
+              : "text-muted-foreground hover:bg-muted"
+          )}>
+            <ListChecks className="h-5 w-5 mr-3" />
+            Mis Tareas
+          </Link>
+          
+          <Link to="/tareas-independientes" className={cn(
+            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+            location.pathname === "/tareas-independientes" 
+              ? "bg-primary/10 text-primary font-medium"
+              : "text-muted-foreground hover:bg-muted"
+          )}>
+            <CheckSquare className="h-5 w-5 mr-3" />
+            Tareas Independientes
+          </Link>
+          
+          <Link to="/timesheet" className={cn(
+            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+            location.pathname === "/timesheet" 
+              ? "bg-primary/10 text-primary font-medium"
+              : "text-muted-foreground hover:bg-muted"
+          )}>
+            <Clock className="h-5 w-5 mr-3" />
+            Timesheet
+          </Link>
+          
+          <Link to="/notificaciones" className={cn(
+            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+            location.pathname === "/notificaciones" 
+              ? "bg-primary/10 text-primary font-medium"
+              : "text-muted-foreground hover:bg-muted"
+          )}>
+            <BellRing className="h-5 w-5 mr-3" />
+            Notificaciones
+          </Link>
+          
+          <Link to="/aprobaciones" className={cn(
+            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+            location.pathname === "/aprobaciones" 
+              ? "bg-primary/10 text-primary font-medium"
+              : "text-muted-foreground hover:bg-muted"
+          )}>
+            <Calendar className="h-5 w-5 mr-3" />
+            Aprobaciones
+          </Link>
+        </nav>
         
-        <NavLink to="/tareas-independientes" className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-sidebar-accent text-sidebar-foreground">
-          <FolderKanban className="w-4 h-4 text-sidebar-foreground/70" />
-          <span>Tareas Independientes</span>
-        </NavLink>
-
-        <div className="space-y-1 mt-2">
-          <div className="flex items-center justify-between">
-            <NavLink 
-              to="/equipos/desarrollo" 
-              className={({ isActive }) => cn(
-                'flex flex-1 items-center gap-2 px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent rounded-md',
-                isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground'
-              )}
-            >
-              <Users className="w-4 h-4 text-sidebar-foreground/70" />
-              <span>Equipo de Desarrollo</span>
-              <span className="ml-1 text-xs text-muted-foreground">(2)</span>
-            </NavLink>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-7 w-7 mr-2"
-              onClick={handleNewPortfolio}
-            >
-              <Plus className="h-3.5 w-3.5" />
+        <div className="mt-6">
+          <div className="px-3 text-xs font-medium text-muted-foreground mb-2 flex items-center justify-between">
+            <span>Espacios</span>
+            <Button variant="ghost" size="icon" className="h-4 w-4">
+              <Plus className="h-3 w-3" />
             </Button>
           </div>
           
-          <div className="pl-3 space-y-1">
-            <CollapsibleGroup
-              label="Portafolio 1"
-              count={2}
-              icon={Briefcase}
-              color="bg-purple-500"
-              directLink="/portfolios/1"
-              addAction={handleNewProject}
-            >
-              <NavLink to="/portfolios/1" className="w-full text-left text-xs flex items-center gap-1 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent hover:text-accent-foreground">
-                <span className="inline-block">Dashboard de portafolio</span>
-              </NavLink>
-              
-              <ProjectItem name="Proyecto 1A" id="1a" color="bg-green-500" />
-              <ProjectItem name="Proyecto 1B" id="1b" color="bg-yellow-500" />
-            </CollapsibleGroup>
+          <div className="space-y-1 px-2">
+            <div className="space-y-1">
+              <div className="group">
+                <div className="flex items-center justify-between px-2 py-1.5 text-sm rounded-md hover:bg-muted cursor-pointer">
+                  <div className="flex items-center" onClick={() => toggleExpand('desarrollo')}>
+                    {expanded.desarrollo ? (
+                      <ChevronDown className="h-4 w-4 mr-2" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 mr-2" />
+                    )}
+                    <Users className="h-4 w-4 mr-2" />
+                    <span>Equipo de Desarrollo</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+                
+                {expanded.desarrollo && (
+                  <div className="ml-7 space-y-1">
+                    <Link to="/equipos/desarrollo" className={cn(
+                      "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+                      location.pathname === "/equipos/desarrollo" 
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:bg-muted"
+                    )}>
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      Dashboard
+                    </Link>
+                    
+                    <div className="group">
+                      <div className="flex items-center justify-between px-2 py-1.5 text-sm rounded-md hover:bg-muted cursor-pointer">
+                        <div className="flex items-center" onClick={() => toggleExpand('portfolio-1')}>
+                          {expanded['portfolio-1'] ? (
+                            <ChevronDown className="h-4 w-4 mr-2" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 mr-2" />
+                          )}
+                          <FolderKanban className="h-4 w-4 mr-2" />
+                          <span>Portafolio 1</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      
+                      {expanded['portfolio-1'] && (
+                        <div className="ml-7 space-y-1">
+                          <Link to="/portfolios/1" className={cn(
+                            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+                            location.pathname === "/portfolios/1" 
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "text-muted-foreground hover:bg-muted"
+                          )}>
+                            <LayoutDashboard className="h-4 w-4 mr-2" />
+                            Dashboard
+                          </Link>
+                          <Link to="/projects/1a" className={cn(
+                            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+                            location.pathname === "/projects/1a" 
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "text-muted-foreground hover:bg-muted"
+                          )}>
+                            <FileCog className="h-4 w-4 mr-2" />
+                            Proyecto 1A
+                          </Link>
+                          <Link to="/projects/1b" className={cn(
+                            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+                            location.pathname === "/projects/1b" 
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "text-muted-foreground hover:bg-muted"
+                          )}>
+                            <FileCog className="h-4 w-4 mr-2" />
+                            Proyecto 1B
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-auto p-3 border-t">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <span>AS</span>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-sidebar-foreground truncate">Alejandro Sánchez</p>
-            <p className="text-xs text-sidebar-foreground/60 truncate">Gerente de Proyecto</p>
-          </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
         </div>
       </div>
     </div>

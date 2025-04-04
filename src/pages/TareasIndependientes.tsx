@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TaskList from '../components/project/TaskList';
 import KanbanView from '../components/project/KanbanView';
-import { Plus, Filter, SortDesc } from 'lucide-react';
+import { Plus, Filter, SortDesc, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,16 +39,23 @@ export default function TareasIndependientes() {
         </div>
         
         <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button className="gap-1">
-              <Plus className="h-4 w-4" />
-              Agregar tarea
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1">
-              <Plus className="h-4 w-4" />
-              Agregar subtarea
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Agregar tarea
+                <ChevronDown className="h-4 w-4 opacity-70" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>
+                Nueva tarea
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Nueva subtarea
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           <div className="flex items-center gap-2">
             <DropdownMenu>

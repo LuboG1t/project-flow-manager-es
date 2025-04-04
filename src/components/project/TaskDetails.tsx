@@ -10,13 +10,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -109,7 +109,7 @@ export function TaskDetails({ task, onClose }: TaskDetailsProps) {
   };
   
   return (
-    <div className="w-[520px] border-l bg-background flex flex-col h-full animate-slide-in-right">
+    <div className="w-[600px] border-l bg-background flex flex-col h-full animate-slide-in-right">
       <div className="p-4 border-b flex items-center justify-between">
         <h2 className="font-semibold text-lg">Detalles de la tarea</h2>
         <Button variant="ghost" size="icon" onClick={onClose}>

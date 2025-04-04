@@ -1,16 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   ChevronDown, ChevronRight, Plus, Filter, SortDesc, Milestone, 
-  ListFilter, SquarePen, Calendar, CalendarIcon, Edit
+  ListFilter, SquarePen, Calendar, Edit, useLocation
 } from 'lucide-react';
 import { TaskDetails } from './TaskDetails';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger 
 } from '@/components/ui/tooltip';
+import { useLocation } from 'react-router-dom';
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Tipos de datos
 interface Subtask {
   id: string;
   name: string;
@@ -92,125 +91,9 @@ export default function TaskList() {
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
   const [editingCell, setEditingCell] = useState<{id: string, field: string} | null>(null);
   const [editValue, setEditValue] = useState<string>('');
-
-  // Mock data
-  const phases: Phase[] = [
-    {
-      id: 'phase-1',
-      name: 'Fase 1',
-      tasks: [
-        {
-          id: 'task-1',
-          name: 'Tarea 1',
-          startDate: '24 abr 2025',
-          endDate: '28 abr 2025',
-          duration: '5d',
-          status: 'in-review',
-          priority: 'high',
-          assignedTo: {
-            name: 'Mariangel',
-            initials: 'MA',
-            avatar: '/avatar-person.jpg'
-          },
-          timeSpent: '10h/72h',
-          subtasks: [
-            {
-              id: 'subtask-1',
-              name: 'Subtarea 1',
-              startDate: '24 abr 2025',
-              endDate: '24 abr 2025',
-              duration: '1d',
-              status: 'completed',
-              priority: 'high',
-              assignedTo: {
-                name: 'Mariangel',
-                initials: 'MA',
-                avatar: '/avatar-person.jpg'
-              },
-              timeSpent: '8h/8h'
-            },
-            {
-              id: 'subtask-2',
-              name: 'Subtarea 2',
-              startDate: '24 abr 2025',
-              endDate: '24 abr 2025',
-              duration: '1d',
-              status: 'completed',
-              priority: 'high',
-              assignedTo: {
-                name: 'Mariangel',
-                initials: 'MA',
-                avatar: '/avatar-person.jpg'
-              },
-              timeSpent: '8h/8h'
-            }
-          ]
-        },
-        {
-          id: 'task-2',
-          name: 'Sistema de Gestión de Tickets',
-          startDate: '24 abr 2025',
-          endDate: '28 abr 2025',
-          duration: '5d',
-          status: 'in-review',
-          priority: 'high',
-          assignedTo: {
-            name: 'Mariangel',
-            initials: 'MA',
-            avatar: '/avatar-person-2.jpg'
-          },
-          timeSpent: '10h/72h',
-          subtasks: [
-            {
-              id: 'subtask-3',
-              name: 'Subitem',
-              startDate: '20 abr 2025',
-              endDate: '20 abr 2025',
-              duration: '1d',
-              status: 'completed',
-              priority: 'high',
-              assignedTo: {
-                name: 'Mariangel',
-                initials: 'MA',
-                avatar: '/avatar-person-2.jpg'
-              },
-              timeSpent: '8h/8h'
-            },
-            {
-              id: 'subtask-4',
-              name: 'Another subitem',
-              startDate: '21 abr 2025',
-              endDate: '21 abr 2025',
-              duration: '1d',
-              status: 'completed',
-              priority: 'high',
-              assignedTo: {
-                name: 'Mariangel',
-                initials: 'MA',
-                avatar: '/avatar-person-2.jpg'
-              },
-              timeSpent: '8h/8h'
-            }
-          ]
-        },
-        {
-          id: 'task-3',
-          name: 'Estructura de la página',
-          startDate: '1 abr 2025',
-          endDate: '3 abr 2025',
-          duration: '3d',
-          status: 'new',
-          priority: 'high',
-          assignedTo: {
-            name: 'Mariangel',
-            initials: 'MA',
-            avatar: '/avatar-person-3.jpg'
-          },
-          timeSpent: '-'
-        }
-      ]
-    }
-  ];
+  const location = useLocation();
+  
+  const isIndependentTasks = location.pathname === '/tareas-independientes';
 
   const togglePhase = (phaseId: string) => {
     setExpandedPhases(prev => ({
@@ -268,14 +151,12 @@ export default function TaskList() {
     );
   };
   
-  // Funciones para editar celdas
   const handleStartEdit = (id: string, field: string, initialValue: string) => {
     setEditingCell({ id, field });
     setEditValue(initialValue);
   };
   
   const handleSaveEdit = () => {
-    // Aquí iría la lógica para guardar el cambio
     console.log("Guardar cambio:", editingCell, editValue);
     setEditingCell(null);
   };
@@ -420,37 +301,67 @@ export default function TaskList() {
     phase.tasks.flatMap(task => task.subtasks || []).find(subtask => subtask.id === selectedTaskId)
   ).filter(Boolean)[0];
 
+  const renderAddDropdown = () => {
+    if (isIndependentTasks) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Agregar
+              <ChevronDown className="h-4 w-4 opacity-70" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem>
+              <SquarePen className="mr-2 h-4 w-4" />
+              <span>Nueva tarea</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <ListFilter className="mr-2 h-4 w-4" />
+              <span>Nueva subtarea</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    } else {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Agregar
+              <ChevronDown className="h-4 w-4 opacity-70" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem>
+              <Milestone className="mr-2 h-4 w-4" />
+              <span>Nueva fase</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <SquarePen className="mr-2 h-4 w-4" />
+              <span>Nueva tarea</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <ListFilter className="mr-2 h-4 w-4" />
+              <span>Nueva subtarea</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Milestone className="mr-2 h-4 w-4" />
+              <span>Nuevo hito</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+  };
+
   return (
     <div className="flex h-full">
       <div className="flex-1 overflow-auto">
         <div className="p-4 flex items-center justify-between">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Agregar
-                <ChevronDown className="h-4 w-4 opacity-70" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem>
-                <Milestone className="mr-2 h-4 w-4" />
-                <span>Nueva fase</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <SquarePen className="mr-2 h-4 w-4" />
-                <span>Nueva tarea</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <ListFilter className="mr-2 h-4 w-4" />
-                <span>Nueva subtarea</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Milestone className="mr-2 h-4 w-4" />
-                <span>Nuevo hito</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {renderAddDropdown()}
           
           <div className="flex items-center gap-2">
             <DropdownMenu>
@@ -527,45 +438,49 @@ export default function TaskList() {
           <TableBody>
             {phases.map((phase) => (
               <React.Fragment key={phase.id}>
-                <TableRow className="group hover:bg-muted/50">
-                  <TableCell colSpan={8} className="p-0">
-                    <button
-                      onClick={() => togglePhase(phase.id)}
-                      className="flex items-center w-full p-3 text-left font-medium hover:bg-muted/40"
-                    >
-                      {expandedPhases[phase.id] ? (
-                        <ChevronDown className="h-4 w-4 mr-2 text-muted-foreground" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 mr-2 text-muted-foreground" />
-                      )}
-                      {phase.name}
-                    </button>
-                  </TableCell>
-                </TableRow>
-                {expandedPhases[phase.id] && phase.tasks.map((task) => (
+                {!isIndependentTasks && (
+                  <TableRow className="group hover:bg-muted/50">
+                    <TableCell colSpan={8} className="p-0">
+                      <button
+                        onClick={() => togglePhase(phase.id)}
+                        className="flex items-center w-full p-3 text-left font-medium hover:bg-muted/40"
+                      >
+                        {expandedPhases[phase.id] ? (
+                          <ChevronDown className="h-4 w-4 mr-2 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 mr-2 text-muted-foreground" />
+                        )}
+                        {phase.name}
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {(expandedPhases[phase.id] || isIndependentTasks) && phase.tasks.map((task) => (
                   <React.Fragment key={task.id}>
                     <TableRow 
                       className={`hover:bg-muted/40 group ${selectedTaskId === task.id ? 'bg-muted/60' : ''}`}
                     >
-                      <TableCell className="font-medium flex items-center gap-2">
-                        {task.subtasks && (
+                      <TableCell className="font-medium pl-4 md:pl-16">
+                        <div className="flex items-center gap-2">
+                          {task.subtasks && (
+                            <button
+                              onClick={() => toggleTask(task.id)}
+                              className="flex-shrink-0 p-0.5 rounded hover:bg-muted"
+                            >
+                              {expandedTasks[task.id] ? (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                              )}
+                            </button>
+                          )}
                           <button
-                            onClick={() => toggleTask(task.id)}
-                            className="flex-shrink-0 p-0.5 rounded hover:bg-muted"
+                            onClick={() => handleTaskClick(task.id)}
+                            className="hover:underline"
                           >
-                            {expandedTasks[task.id] ? (
-                              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-                            )}
+                            {task.name}
                           </button>
-                        )}
-                        <button
-                          onClick={() => handleTaskClick(task.id)}
-                          className="hover:underline"
-                        >
-                          {task.name}
-                        </button>
+                        </div>
                       </TableCell>
                       <TableCell className="group">
                         {renderEditableDate(task.id, task.startDate, 'startDate')}
@@ -597,7 +512,7 @@ export default function TaskList() {
                         key={subtask.id}
                         className={`hover:bg-muted/30 group ${selectedTaskId === subtask.id ? 'bg-muted/40' : ''}`}
                       >
-                        <TableCell className="font-normal pl-12">
+                        <TableCell className="font-normal pl-16 md:pl-24">
                           <button
                             onClick={() => handleTaskClick(subtask.id)}
                             className="hover:underline"
