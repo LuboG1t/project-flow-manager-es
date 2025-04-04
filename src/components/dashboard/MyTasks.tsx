@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDown, ChevronRight, Calendar, Filter, SortDesc, Plus, Clock, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronRight, Calendar, Filter, SortDesc, Plus, Clock, AlertTriangle, MessageSquare } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -194,7 +194,7 @@ export default function MyTasks() {
 
   const renderTaskTable = (tasks: Task[], title: string) => {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <h3 className="text-lg font-medium px-4">{title}</h3>
         <Table>
           <TableHeader>
@@ -246,7 +246,7 @@ export default function MyTasks() {
 
   const renderMilestones = () => {
     return (
-      <Card className="col-span-1 lg:col-span-3">
+      <Card className="h-full">
         <CardHeader>
           <CardTitle className="text-lg font-medium flex items-center gap-2">
             <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -257,7 +257,7 @@ export default function MyTasks() {
           <div className="divide-y">
             {upcomingMilestones.map((milestone) => (
               <div key={milestone.id} className="p-4 flex items-start gap-3 hover:bg-muted/50">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <Calendar className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -283,6 +283,45 @@ export default function MyTasks() {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderOverdueTasks = () => {
+    return (
+      <Card className="h-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            Tareas Vencidas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[200px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Vencimiento</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Prioridad</TableHead>
+                  <TableHead>Proyecto</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {taskGroups.overdue.map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.name}</TableCell>
+                    <TableCell>{task.dueDate}</TableCell>
+                    <TableCell>{renderStatusBadge(task.status)}</TableCell>
+                    <TableCell>{renderPriorityBadge(task.priority)}</TableCell>
+                    <TableCell>{task.location}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
     );
@@ -385,50 +424,24 @@ export default function MyTasks() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-        <div className="col-span-1 lg:col-span-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-                Tareas Vencidas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[200px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Vencimiento</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Prioridad</TableHead>
-                      <TableHead>Proyecto</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {taskGroups.overdue.map((task) => (
-                      <TableRow key={task.id}>
-                        <TableCell>{task.name}</TableCell>
-                        <TableCell>{task.dueDate}</TableCell>
-                        <TableCell>{renderStatusBadge(task.status)}</TableCell>
-                        <TableCell>{renderPriorityBadge(task.priority)}</TableCell>
-                        <TableCell>{task.location}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+      {/* Primera fila: Tareas Vencidas y Próximos Hitos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="col-span-1">
+          {renderOverdueTasks()}
         </div>
-        
-        {renderMilestones()}
+        <div className="col-span-1">
+          {renderMilestones()}
+        </div>
       </div>
       
-      <div className="space-y-8">
-        {renderTaskTable(taskGroups.upcoming, 'Tareas próximas a vencer')}
-        {renderTaskTable(taskGroups.pending, 'Tareas pendientes')}
+      {/* Segunda fila: Tareas próximas y pendientes */}
+      <div className="grid grid-cols-1 gap-6 mb-6">
+        <div className="col-span-1">
+          {renderTaskTable(taskGroups.upcoming, 'Tareas próximas a vencer')}
+        </div>
+        <div className="col-span-1">
+          {renderTaskTable(taskGroups.pending, 'Tareas pendientes')}
+        </div>
       </div>
     </div>
   );

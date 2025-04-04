@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +14,16 @@ import { Filter, Plus, SortDesc, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import ProjectModal from './ProjectModal';
+import { NavLink } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Project {
   id: string;
@@ -81,6 +92,18 @@ export default function Portfolio() {
     pendingTasks: 30,
     delayedTasks: 0
   };
+
+  const widgetOptions = [
+    'Resumen de proyectos',
+    'Distribución de tareas',
+    'Progreso del portafolio',
+    'Hitos importantes',
+    'Recursos asignados'
+  ];
+
+  const handleAddWidget = (widget: string) => {
+    console.log(`Añadiendo widget: ${widget}`);
+  };
   
   const getPhaseBadgeClass = (phase: string) => {
     switch (phase) {
@@ -101,6 +124,14 @@ export default function Portfolio() {
         <div>
           <h1 className="text-2xl font-bold">Portafolio 1</h1>
           <p className="text-muted-foreground">Gestión de proyectos</p>
+          <div className="mt-2">
+            <NavLink 
+              to="/portfolios/1" 
+              className="text-primary hover:text-primary/90 text-sm font-medium flex items-center gap-1"
+            >
+              <span>Ver detalles del portafolio</span>
+            </NavLink>
+          </div>
         </div>
         
         <div className="flex items-center gap-2">
@@ -110,6 +141,25 @@ export default function Portfolio() {
               <TabsTrigger value="gantt">Gantt</TabsTrigger>
             </TabsList>
           </Tabs>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1">
+                <Plus className="h-4 w-4" />
+                Añadir widget
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {widgetOptions.map((widget) => (
+                <DropdownMenuItem 
+                  key={widget} 
+                  onClick={() => handleAddWidget(widget)}
+                >
+                  {widget}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
@@ -147,14 +197,44 @@ export default function Portfolio() {
         </Button>
         
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Filter className="h-4 w-4" />
-            Filtrar
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <SortDesc className="h-4 w-4" />
-            Ordenar
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Filter className="h-4 w-4" />
+                Filtrar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>Fase</DropdownMenuItem>
+                <DropdownMenuItem>Progreso</DropdownMenuItem>
+                <DropdownMenuItem>Responsable</DropdownMenuItem>
+                <DropdownMenuItem>Estado</DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <SortDesc className="h-4 w-4" />
+                Ordenar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>Fecha (más reciente)</DropdownMenuItem>
+                <DropdownMenuItem>Fecha (más antigua)</DropdownMenuItem>
+                <DropdownMenuItem>Progreso (mayor a menor)</DropdownMenuItem>
+                <DropdownMenuItem>Progreso (menor a mayor)</DropdownMenuItem>
+                <DropdownMenuItem>Nombre (A-Z)</DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
@@ -174,7 +254,11 @@ export default function Portfolio() {
           <TableBody>
             {projects.map((project) => (
               <TableRow key={project.id} className="hover:bg-muted/40">
-                <TableCell className="font-medium">{project.name}</TableCell>
+                <TableCell className="font-medium">
+                  <NavLink to={`/proyectos/${project.id}`} className="hover:text-primary hover:underline">
+                    {project.name}
+                  </NavLink>
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">

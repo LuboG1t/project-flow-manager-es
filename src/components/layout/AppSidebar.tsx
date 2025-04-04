@@ -91,7 +91,10 @@ const CollapsibleGroup = ({
           <ChevronRight className={cn("w-4 h-4 text-sidebar-foreground/50 transition-transform", isOpen && "rotate-90")} />
         </button>
         {addAction && (
-          <Button variant="ghost" size="icon" className="h-7 w-7 mr-2" onClick={addAction}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 mr-2" onClick={(e) => {
+            e.stopPropagation();
+            addAction();
+          }}>
             <Plus className="h-3.5 w-3.5" />
           </Button>
         )}
@@ -120,6 +123,7 @@ const ProjectItem = ({ name, id, color = 'bg-primary' }: { name: string; id: str
 
 export function AppSidebar() {
   const [showSpaceDropdown, setShowSpaceDropdown] = useState(false);
+  const navigate = useNavigate();
   
   const handleNewSpace = () => {
     setShowSpaceDropdown(true);
@@ -156,7 +160,7 @@ export function AppSidebar() {
         <NavItem icon={Calendar} label="Aprobaciones" to="/aprobaciones" count={2} />
       </div>
 
-      <div className="px-2 pt-4 pb-2">
+      <div className="px-2 pt-4 pb-2 flex-1 overflow-y-auto">
         <div className="px-3 mb-2 flex items-center justify-between">
           <h3 className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Espacios</h3>
           <DropdownMenu open={showSpaceDropdown} onOpenChange={setShowSpaceDropdown}>
@@ -187,34 +191,47 @@ export function AppSidebar() {
           <span>Tareas Independientes</span>
         </NavLink>
 
-        <CollapsibleGroup 
-          label="Equipo de Desarrollo" 
-          count={2} 
-          icon={Users}
-          color="bg-blue-500"
-          directLink="/equipos/desarrollo"
-          addAction={handleNewPortfolio}
-        >
-          <NavLink to="/equipos/desarrollo" className="w-full text-left text-xs flex items-center gap-1 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent hover:text-accent-foreground">
-            <span className="inline-block">Dashboard de equipo</span>
-          </NavLink>
-          
-          <CollapsibleGroup 
-            label="Portafolio 1" 
-            count={2}
-            icon={Briefcase}
-            color="bg-purple-500"
-            directLink="/portfolios/1"
-            addAction={handleNewProject}
-          >
-            <NavLink to="/portfolios/1" className="w-full text-left text-xs flex items-center gap-1 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent hover:text-accent-foreground">
-              <span className="inline-block">Dashboard de portafolio</span>
+        <div className="space-y-1 mt-2">
+          <div className="flex items-center justify-between">
+            <NavLink 
+              to="/equipos/desarrollo" 
+              className={({ isActive }) => cn(
+                'flex flex-1 items-center gap-2 px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent rounded-md',
+                isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground'
+              )}
+            >
+              <Users className="w-4 h-4 text-sidebar-foreground/70" />
+              <span>Equipo de Desarrollo</span>
+              <span className="ml-1 text-xs text-muted-foreground">(2)</span>
             </NavLink>
-            
-            <ProjectItem name="Proyecto 1A" id="1a" color="bg-green-500" />
-            <ProjectItem name="Proyecto 1B" id="1b" color="bg-yellow-500" />
-          </CollapsibleGroup>
-        </CollapsibleGroup>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-7 w-7 mr-2"
+              onClick={handleNewPortfolio}
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          
+          <div className="pl-3 space-y-1">
+            <CollapsibleGroup
+              label="Portafolio 1"
+              count={2}
+              icon={Briefcase}
+              color="bg-purple-500"
+              directLink="/portfolios/1"
+              addAction={handleNewProject}
+            >
+              <NavLink to="/portfolios/1" className="w-full text-left text-xs flex items-center gap-1 px-3 py-2 rounded-md transition-colors hover:bg-sidebar-accent hover:text-accent-foreground">
+                <span className="inline-block">Dashboard de portafolio</span>
+              </NavLink>
+              
+              <ProjectItem name="Proyecto 1A" id="1a" color="bg-green-500" />
+              <ProjectItem name="Proyecto 1B" id="1b" color="bg-yellow-500" />
+            </CollapsibleGroup>
+          </div>
+        </div>
       </div>
 
       <div className="mt-auto p-3 border-t">

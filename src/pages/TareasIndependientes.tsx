@@ -5,6 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TaskList from '../components/project/TaskList';
 import KanbanView from '../components/project/KanbanView';
+import { Plus, Filter, SortDesc } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function TareasIndependientes() {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
@@ -25,6 +35,75 @@ export default function TareasIndependientes() {
                 <TabsTrigger value="kanban">Kanban</TabsTrigger>
               </TabsList>
             </Tabs>
+          </div>
+        </div>
+        
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button className="gap-1">
+              <Plus className="h-4 w-4" />
+              Agregar tarea
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1">
+              <Plus className="h-4 w-4" />
+              Agregar subtarea
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Filter className="h-4 w-4" />
+                  Filtrar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    Estado
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Prioridad
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Fecha
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <SortDesc className="h-4 w-4" />
+                  Ordenar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    Fecha (más reciente)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Fecha (más antigua)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Prioridad (alta a baja)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Prioridad (baja a alta)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    Nombre (A-Z)
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         

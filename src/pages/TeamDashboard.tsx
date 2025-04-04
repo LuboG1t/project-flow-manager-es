@@ -17,12 +17,20 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Users, TrendingUp, Briefcase, Clock, Calendar, 
-  CheckSquare, XCircle, AlertTriangle, Trophy
+  CheckSquare, XCircle, AlertTriangle, Trophy, Plus
 } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { AvatarGroup } from '@/components/ui/avatar-group';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { NavLink } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function TeamDashboard() {
   // Sample data for charts
@@ -54,7 +62,19 @@ export default function TeamDashboard() {
     { id: '3', title: 'Revisión de sprint', date: '10/04/2025', time: '11:30 AM', participants: 10 },
   ];
 
-  const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
+  const widgetOptions = [
+    'Estado de los proyectos',
+    'Carga de trabajo del equipo',
+    'Rendimiento del equipo',
+    'Próximos eventos',
+    'Tareas completadas',
+    'Tareas en riesgo',
+    'Tareas con retraso'
+  ];
+
+  const handleAddWidget = (widget: string) => {
+    console.log(`Añadiendo widget: ${widget}`);
+  };
 
   return (
     <Layout>
@@ -63,6 +83,15 @@ export default function TeamDashboard() {
           <div>
             <h1 className="text-2xl font-bold">Dashboard del Equipo de Desarrollo</h1>
             <p className="text-muted-foreground">Rendimiento y estado general del equipo</p>
+            <div className="mt-2">
+              <NavLink 
+                to="/equipos/desarrollo" 
+                className="text-primary hover:text-primary/90 text-sm font-medium flex items-center gap-1"
+              >
+                <Users className="h-4 w-4" />
+                <span>Ver detalles del equipo</span>
+              </NavLink>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
@@ -73,6 +102,25 @@ export default function TeamDashboard() {
                 <TabsTrigger value="quarter">Trimestre</TabsTrigger>
               </TabsList>
             </Tabs>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  Añadir widget
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {widgetOptions.map((widget) => (
+                  <DropdownMenuItem 
+                    key={widget} 
+                    onClick={() => handleAddWidget(widget)}
+                  >
+                    {widget}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -112,10 +160,10 @@ export default function TeamDashboard() {
                 8 proyectos en total
               </p>
               <div className="mt-3 space-y-1.5">
-                <div className="flex items-center">
+                <NavLink to="/portfolios/1" className="flex items-center hover:text-primary">
                   <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
                   <span className="text-sm">Portafolio 1 (4 proyectos)</span>
-                </div>
+                </NavLink>
                 <div className="flex items-center">
                   <span className="h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
                   <span className="text-sm">Portafolio 2 (3 proyectos)</span>

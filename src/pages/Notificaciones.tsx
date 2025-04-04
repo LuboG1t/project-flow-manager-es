@@ -9,6 +9,7 @@ import {
 import { Avatar } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 interface Notification {
   id: string;
@@ -23,9 +24,11 @@ interface Notification {
   time: string;
   read: boolean;
   icon: React.ReactElement;
+  link?: string;
 }
 
 export default function Notificaciones() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [notifications, setNotifications] = useState<Notification[]>([
     {
@@ -40,7 +43,8 @@ export default function Notificaciones() {
       },
       time: 'Hace 10 minutos',
       read: false,
-      icon: <UserPlus className="h-5 w-5 text-blue-500" />
+      icon: <UserPlus className="h-5 w-5 text-blue-500" />,
+      link: '/proyectos/1a'
     },
     {
       id: '2',
@@ -54,7 +58,8 @@ export default function Notificaciones() {
       },
       time: 'Hace 45 minutos',
       read: false,
-      icon: <MessageSquare className="h-5 w-5 text-indigo-500" />
+      icon: <MessageSquare className="h-5 w-5 text-indigo-500" />,
+      link: '/proyectos/1a'
     },
     {
       id: '3',
@@ -68,7 +73,8 @@ export default function Notificaciones() {
       },
       time: 'Hace 2 horas',
       read: true,
-      icon: <Clock className="h-5 w-5 text-yellow-500" />
+      icon: <Clock className="h-5 w-5 text-yellow-500" />,
+      link: '/proyectos/1a'
     },
     {
       id: '4',
@@ -82,7 +88,8 @@ export default function Notificaciones() {
       },
       time: 'Hace 3 horas',
       read: true,
-      icon: <BadgeCheck className="h-5 w-5 text-green-500" />
+      icon: <BadgeCheck className="h-5 w-5 text-green-500" />,
+      link: '/proyectos/1b'
     },
     {
       id: '5',
@@ -95,7 +102,8 @@ export default function Notificaciones() {
       },
       time: 'Hace 1 día',
       read: true,
-      icon: <Share2 className="h-5 w-5 text-purple-500" />
+      icon: <Share2 className="h-5 w-5 text-purple-500" />,
+      link: '/proyectos/1c'
     }
   ]);
   
@@ -119,6 +127,13 @@ export default function Notificaciones() {
     setNotifications(prev => 
       prev.filter(n => n.id !== id)
     );
+  };
+  
+  const handleNotificationClick = (notification: Notification) => {
+    handleMarkAsRead(notification.id);
+    if (notification.link) {
+      navigate(notification.link);
+    }
   };
   
   return (
@@ -160,9 +175,10 @@ export default function Notificaciones() {
           {filteredNotifications.map((notification) => (
             <div 
               key={notification.id}
-              className={`p-4 border rounded-lg flex items-start gap-4 transition-colors ${
+              className={`p-4 border rounded-lg flex items-start gap-4 transition-colors hover:bg-muted/50 cursor-pointer ${
                 notification.read ? 'bg-card' : 'bg-primary/5'
               }`}
+              onClick={() => handleNotificationClick(notification)}
             >
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                 {notification.icon}
@@ -206,7 +222,10 @@ export default function Notificaciones() {
                         variant="ghost" 
                         size="icon" 
                         className="h-7 w-7" 
-                        onClick={() => handleMarkAsRead(notification.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkAsRead(notification.id);
+                        }}
                       >
                         <CheckCircle className="h-4 w-4" />
                       </Button>
@@ -215,15 +234,14 @@ export default function Notificaciones() {
                       variant="ghost" 
                       size="icon" 
                       className="h-7 w-7" 
-                      onClick={() => handleDelete(notification.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(notification.id);
+                      }}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                </div>
-                
-                <div className="mt-3">
-                  <Button size="sm" variant="outline">Ver detalles</Button>
                 </div>
               </div>
             </div>
