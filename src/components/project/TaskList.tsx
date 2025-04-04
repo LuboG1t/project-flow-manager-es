@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   ChevronDown, ChevronRight, Plus, Filter, SortDesc, Milestone, 
-  ListFilter, SquarePen, Calendar, Edit, useLocation
+  ListFilter, SquarePen, Calendar, Edit
 } from 'lucide-react';
 import { TaskDetails } from './TaskDetails';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -82,6 +82,113 @@ const priorityColors = {
   'medium': 'text-amber-500 bg-amber-50',
   'low': 'text-green-500 bg-green-50',
 };
+
+const phases: Phase[] = [
+  {
+    id: 'phase-1',
+    name: 'Fase 1: Planificación',
+    tasks: [
+      {
+        id: 'task-1',
+        name: 'Definición de requisitos',
+        startDate: '01/04/2025',
+        endDate: '10/04/2025',
+        duration: '10d',
+        status: 'completed',
+        priority: 'high',
+        assignedTo: {
+          name: 'Carlos Pérez',
+          initials: 'CP',
+          avatar: ''
+        },
+        timeSpent: '40h/40h',
+        subtasks: [
+          {
+            id: 'subtask-1',
+            name: 'Entrevistas con stakeholders',
+            startDate: '01/04/2025',
+            endDate: '05/04/2025',
+            duration: '5d',
+            status: 'completed',
+            priority: 'high',
+            assignedTo: {
+              name: 'Carlos Pérez',
+              initials: 'CP',
+              avatar: ''
+            },
+            timeSpent: '20h/20h'
+          },
+          {
+            id: 'subtask-2',
+            name: 'Documentación de requisitos',
+            startDate: '06/04/2025',
+            endDate: '10/04/2025',
+            duration: '5d',
+            status: 'completed',
+            priority: 'high',
+            assignedTo: {
+              name: 'Carlos Pérez',
+              initials: 'CP',
+              avatar: ''
+            },
+            timeSpent: '20h/20h'
+          }
+        ]
+      },
+      {
+        id: 'task-2',
+        name: 'Planificación de sprints',
+        startDate: '11/04/2025',
+        endDate: '15/04/2025',
+        duration: '5d',
+        status: 'in-progress',
+        priority: 'medium',
+        assignedTo: {
+          name: 'Ana Gómez',
+          initials: 'AG',
+          avatar: ''
+        },
+        timeSpent: '10h/20h'
+      }
+    ]
+  },
+  {
+    id: 'phase-2',
+    name: 'Fase 2: Desarrollo',
+    tasks: [
+      {
+        id: 'task-3',
+        name: 'Desarrollo del backend',
+        startDate: '16/04/2025',
+        endDate: '30/04/2025',
+        duration: '15d',
+        status: 'new',
+        priority: 'high',
+        assignedTo: {
+          name: 'Miguel Torres',
+          initials: 'MT',
+          avatar: ''
+        },
+        timeSpent: '-'
+      },
+      {
+        id: 'task-4',
+        name: 'Desarrollo del frontend',
+        startDate: '16/04/2025',
+        endDate: '30/04/2025',
+        duration: '15d',
+        status: 'new',
+        priority: 'high',
+        assignedTo: {
+          name: 'Laura Sánchez',
+          initials: 'LS',
+          avatar: ''
+        },
+        timeSpent: '-'
+      }
+    ]
+  }
+];
 
 export default function TaskList() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);

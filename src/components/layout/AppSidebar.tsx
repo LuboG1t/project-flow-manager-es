@@ -5,7 +5,7 @@ import { ChevronRight, ChevronDown, Plus, LayoutDashboard, Calendar, Inbox, Chec
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Logo } from '../Logo';
+import Logo from '../Logo';
 
 export default function AppSidebar() {
   const location = useLocation();
