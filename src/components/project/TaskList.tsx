@@ -190,7 +190,11 @@ const phases: Phase[] = [
   }
 ];
 
-export default function TaskList() {
+interface TaskListProps {
+  projectId?: string;
+}
+
+export default function TaskList({ projectId }: TaskListProps) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({
     'phase-1': true
@@ -200,7 +204,7 @@ export default function TaskList() {
   const [editValue, setEditValue] = useState<string>('');
   const location = useLocation();
   
-  const isIndependentTasks = location.pathname === '/tareas-independientes';
+  const isIndependentTasks = location.pathname === '/tareas-sin-proyecto';
 
   const togglePhase = (phaseId: string) => {
     setExpandedPhases(prev => ({

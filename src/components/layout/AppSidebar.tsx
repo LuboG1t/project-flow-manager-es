@@ -1,11 +1,15 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight, ChevronDown, Plus, LayoutDashboard, Calendar, Inbox, CheckSquare, Users, ListChecks, FileCog, Clock, BellRing, FolderKanban } from 'lucide-react';
+import { ChevronRight as ChevronRightIcon, ChevronDown as ChevronDownIcon, Plus, LayoutDashboard, Calendar, Inbox, CheckSquare, Users, ListChecks, FileCog, Clock, BellRing, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import Logo from '../Logo';
+
+// Create local components to avoid name conflicts
+const ChevronRight = ChevronRightIcon;
+const ChevronDown = ChevronDownIcon;
 
 export default function AppSidebar() {
   const location = useLocation();
@@ -37,16 +41,6 @@ export default function AppSidebar() {
           )}>
             <ListChecks className="h-5 w-5 mr-3" />
             Mis Tareas
-          </Link>
-          
-          <Link to="/tareas-independientes" className={cn(
-            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
-            location.pathname === "/tareas-independientes" 
-              ? "bg-primary/10 text-primary font-medium"
-              : "text-muted-foreground hover:bg-muted"
-          )}>
-            <CheckSquare className="h-5 w-5 mr-3" />
-            Tareas Independientes
           </Link>
           
           <Link to="/timesheet" className={cn(
@@ -92,14 +86,10 @@ export default function AppSidebar() {
             <div className="space-y-1">
               <div className="group">
                 <div className="flex items-center justify-between px-2 py-1.5 text-sm rounded-md hover:bg-muted cursor-pointer">
-                  <div className="flex items-center" onClick={() => toggleExpand('desarrollo')}>
-                    {expanded.desarrollo ? (
-                      <ChevronDown className="h-4 w-4 mr-2" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 mr-2" />
-                    )}
+                  <div className="flex items-center w-full" onClick={() => toggleExpand('desarrollo')}>
+                    <ChevronRight className={cn("h-4 w-4 mr-2 transition-transform", expanded.desarrollo && "rotate-90")} />
                     <Users className="h-4 w-4 mr-2" />
-                    <span>Equipo de Desarrollo</span>
+                    <Link to="/equipos/desarrollo" className="flex-1">Equipo de Desarrollo</Link>
                   </div>
                   <Button 
                     variant="ghost" 
@@ -112,26 +102,12 @@ export default function AppSidebar() {
                 
                 {expanded.desarrollo && (
                   <div className="ml-7 space-y-1">
-                    <Link to="/equipos/desarrollo" className={cn(
-                      "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
-                      location.pathname === "/equipos/desarrollo" 
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "text-muted-foreground hover:bg-muted"
-                    )}>
-                      <LayoutDashboard className="h-4 w-4 mr-2" />
-                      Dashboard
-                    </Link>
-                    
                     <div className="group">
                       <div className="flex items-center justify-between px-2 py-1.5 text-sm rounded-md hover:bg-muted cursor-pointer">
-                        <div className="flex items-center" onClick={() => toggleExpand('portfolio-1')}>
-                          {expanded['portfolio-1'] ? (
-                            <ChevronDown className="h-4 w-4 mr-2" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 mr-2" />
-                          )}
+                        <div className="flex items-center w-full" onClick={() => toggleExpand('portfolio-1')}>
+                          <ChevronRight className={cn("h-4 w-4 mr-2 transition-transform", expanded['portfolio-1'] && "rotate-90")} />
                           <FolderKanban className="h-4 w-4 mr-2" />
-                          <span>Portafolio 1</span>
+                          <Link to="/portfolios/1" className="flex-1">Portafolio 1</Link>
                         </div>
                         <Button 
                           variant="ghost" 
@@ -144,15 +120,6 @@ export default function AppSidebar() {
                       
                       {expanded['portfolio-1'] && (
                         <div className="ml-7 space-y-1">
-                          <Link to="/portfolios/1" className={cn(
-                            "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
-                            location.pathname === "/portfolios/1" 
-                              ? "bg-primary/10 text-primary font-medium"
-                              : "text-muted-foreground hover:bg-muted"
-                          )}>
-                            <LayoutDashboard className="h-4 w-4 mr-2" />
-                            Dashboard
-                          </Link>
                           <Link to="/projects/1a" className={cn(
                             "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
                             location.pathname === "/projects/1a" 
@@ -178,6 +145,16 @@ export default function AppSidebar() {
                 )}
               </div>
             </div>
+            
+            <Link to="/tareas-sin-proyecto" className={cn(
+              "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+              location.pathname === "/tareas-sin-proyecto" 
+                ? "bg-primary/10 text-primary font-medium"
+                : "text-muted-foreground hover:bg-muted"
+            )}>
+              <CheckSquare className="h-4 w-4 mr-2" />
+              Tareas sin proyecto
+            </Link>
           </div>
         </div>
       </div>
