@@ -1,59 +1,44 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { 
-  Calendar, CheckCircle, Circle, Clock, Filter, Flag, KanbanSquare, 
-  ListTodo, MoreHorizontal, Plus, SortDesc, ChevronDown, X
+  Check, ChevronDown, Clock, Filter, SortDesc, Plus, CheckCircle, Circle, 
+  MoreHorizontal, UserPlus, Calendar, KanbanSquare, ListTodo, X
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
   DropdownMenuTrigger, DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
-
-const statusColors = {
-  'no-iniciado': 'bg-slate-200 text-slate-800',
-  'en-progreso': 'bg-blue-100 text-blue-800',
-  'completado': 'bg-green-100 text-green-800',
-  'retrasado': 'bg-red-100 text-red-800',
-  'por-vencer': 'bg-amber-100 text-amber-800'
-};
-
-const priorityColors = {
-  'alta': 'text-red-500',
-  'media': 'text-amber-500',
-  'baja': 'text-green-500'
-};
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+} from '@/components/ui/select';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { Card, CardContent } from '@/components/ui/card';
+import { TaskDetails } from '../project/TaskDetails';
 
 interface Task {
   id: string;
   name: string;
   startDate: string;
   dueDate: string;
-  status: 'no-iniciado' | 'en-progreso' | 'completado' | 'retrasado' | 'por-vencer';
-  priority: 'alta' | 'media' | 'baja';
-  project: {
-    id: string;
-    name: string;
-    path: string;
-  } | null;
   duration: string;
-  timeSpent: string;
+  status: 'completed' | 'in-progress' | 'in-review' | 'new';
+  priority: 'high' | 'medium' | 'low';
   assignedTo?: {
     name: string;
     initials: string;
   };
+  timeSpent: string;
   description?: string;
+  location?: string;
 }
 
 interface Event {
@@ -61,495 +46,350 @@ interface Event {
   name: string;
   date: string;
   time: string;
-  project: {
-    id: string;
-    name: string;
-  } | null;
+  location: string;
 }
 
 export default function MyTasks() {
   const [activeView, setActiveView] = useState<'list' | 'kanban'>('list');
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
-  const [selectedSort, setSelectedSort] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  
+
+  const statusLabels = {
+    'completed': 'Completado',
+    'in-progress': 'En progreso',
+    'in-review': 'En revisión',
+    'new': 'Nuevo'
+  };
+
+  const priorityLabels = {
+    'high': 'Alta',
+    'medium': 'Media',
+    'low': 'Baja'
+  };
+
   const pendingTasks: Task[] = [
     {
       id: 'task-1',
-      name: 'Reunión para revisión de requisitos del sistema de gestión',
-      startDate: '12 abr',
-      dueDate: '15 abr',
-      status: 'no-iniciado',
-      priority: 'alta',
-      project: {
-        id: 'project-1',
-        name: 'Proyecto 1A: Sistema de Gestión',
-        path: '/proyecto-1a'
+      name: 'Investigar nuevas tecnologías de frontend para optimizar desarrollo',
+      startDate: '04 abr',
+      dueDate: '10 abr',
+      duration: '6d',
+      status: 'in-progress',
+      priority: 'medium',
+      assignedTo: {
+        name: 'Guillermo V.',
+        initials: 'GV'
       },
-      duration: '3d',
-      timeSpent: '-',
-      description: 'Realizar reunión con stakeholders para revisar requisitos del sistema de gestión y establecer prioridades para el siguiente sprint.'
+      timeSpent: '4h/20h',
+      description: 'Realizar una investigación sobre las últimas tendencias y frameworks de frontend.',
+      location: 'Proyecto Alpha'
     },
     {
       id: 'task-2',
-      name: 'Desarrollo de API para integración con proveedores',
-      startDate: '10 abr',
-      dueDate: '20 abr',
-      status: 'no-iniciado',
-      priority: 'media',
-      project: {
-        id: 'project-1',
-        name: 'Proyecto 1A: Sistema de Gestión',
-        path: '/proyecto-1a'
+      name: 'Preparar presentación para cliente potencial sobre sistema de gestión',
+      startDate: '02 abr',
+      dueDate: '05 abr',
+      duration: '3d',
+      status: 'in-review',
+      priority: 'high',
+      assignedTo: {
+        name: 'Ana M.',
+        initials: 'AM'
       },
-      duration: '10d',
-      timeSpent: '-',
-      description: 'Desarrollar endpoints de API para la integración con sistemas de proveedores externos.'
+      timeSpent: '8h/12h',
+      description: 'Crear materiales de presentación para la reunión con el cliente potencial.',
+      location: 'Proyecto Beta'
     },
     {
       id: 'task-3',
-      name: 'Actualización de documentación técnica',
-      startDate: '15 abr',
-      dueDate: '18 abr',
-      status: 'no-iniciado',
-      priority: 'baja',
-      project: null,
-      duration: '3d',
+      name: 'Actualizar documentación interna de procesos y mejores prácticas',
+      startDate: '03 abr',
+      dueDate: '08 abr',
+      duration: '5d',
+      status: 'new',
+      priority: 'low',
       timeSpent: '-',
-      description: 'Actualizar la documentación técnica del sistema con los cambios recientes en la arquitectura.'
+      location: 'Sin proyecto'
     },
     {
       id: 'task-4',
-      name: 'Estimación de costos para nuevo módulo de reportes',
-      startDate: '16 abr',
-      dueDate: '19 abr',
-      status: 'no-iniciado',
-      priority: 'media',
-      project: {
-        id: 'portfolio-1',
-        name: 'Portafolio 1: Suite de Aplicaciones',
-        path: '/portafolio-1'
+      name: 'Revisar tickets de soporte pendientes de la plataforma principal',
+      startDate: '01 abr',
+      dueDate: '03 abr',
+      duration: '2d',
+      status: 'in-progress',
+      priority: 'medium',
+      assignedTo: {
+        name: 'Carlos P.',
+        initials: 'CP'
       },
-      duration: '3d',
-      timeSpent: '-',
-      description: 'Estimar costos y tiempo de desarrollo para el nuevo módulo de reportes avanzados.'
-    }
-  ];
-  
-  const inProgressTasks: Task[] = [
+      timeSpent: '6h/6h',
+      location: 'Proyecto Gamma'
+    },
     {
       id: 'task-5',
-      name: 'Desarrollo de interfaz para dashboard principal',
-      startDate: '05 abr',
+      name: 'Planificar actividad de integración de equipo para fin de mes',
+      startDate: '10 abr',
       dueDate: '15 abr',
-      status: 'en-progreso',
-      priority: 'alta',
-      project: {
-        id: 'project-1',
-        name: 'Proyecto 1A: Sistema de Gestión',
-        path: '/proyecto-1a'
-      },
-      duration: '10d',
-      timeSpent: '5d/10d',
+      duration: '5d',
+      status: 'new',
+      priority: 'low',
       assignedTo: {
-        name: 'Juan Pérez',
-        initials: 'JP'
+        name: 'Mariangel',
+        initials: 'MA'
       },
-      description: 'Implementar la interfaz del dashboard principal según los wireframes aprobados.'
+      timeSpent: '-',
+      location: 'Sin proyecto'
     },
     {
       id: 'task-6',
-      name: 'Optimización de consultas SQL para módulo de reportes',
-      startDate: '08 abr',
-      dueDate: '12 abr',
-      status: 'en-progreso',
-      priority: 'media',
-      project: {
-        id: 'project-1b',
-        name: 'Proyecto 1B: Módulo Complementario',
-        path: '/proyecto-1b'
-      },
-      duration: '4d',
-      timeSpent: '3d/4d',
+      name: 'Realizar auditoria de seguridad de la aplicación principal',
+      startDate: '12 abr',
+      dueDate: '20 abr',
+      duration: '8d',
+      status: 'new',
+      priority: 'high',
       assignedTo: {
-        name: 'Ana Gómez',
-        initials: 'AG'
+        name: 'Luis R.',
+        initials: 'LR'
       },
-      description: 'Optimizar las consultas SQL del módulo de reportes para mejorar el rendimiento.'
+      timeSpent: '-',
+      location: 'Proyecto Delta'
     }
   ];
-  
+
   const overdueTasks: Task[] = [
     {
-      id: 'task-7',
-      name: 'Corrección de bugs en formulario de registro',
-      startDate: '01 abr',
-      dueDate: '05 abr',
-      status: 'retrasado',
-      priority: 'alta',
-      project: {
-        id: 'project-1',
-        name: 'Proyecto 1A: Sistema de Gestión',
-        path: '/proyecto-1a'
-      },
-      duration: '4d',
-      timeSpent: '2d/4d',
+      id: 'over-1',
+      name: 'Entrega de informe trimestral de progreso',
+      startDate: '15 mar',
+      dueDate: '30 mar',
+      duration: '15d',
+      status: 'in-progress',
+      priority: 'high',
       assignedTo: {
-        name: 'Carlos Rodríguez',
-        initials: 'CR'
+        name: 'Javier M.',
+        initials: 'JM'
       },
-      description: 'Corregir los bugs identificados en el formulario de registro de usuarios.'
+      timeSpent: '20h/40h',
+      location: 'Proyecto Alpha'
     },
     {
-      id: 'task-8',
-      name: 'Implementación de mecanismo de autenticación SSO',
-      startDate: '28 mar',
-      dueDate: '04 abr',
-      status: 'retrasado',
-      priority: 'alta',
-      project: {
-        id: 'project-1b',
-        name: 'Proyecto 1B: Módulo Complementario',
-        path: '/proyecto-1b'
-      },
-      duration: '7d',
-      timeSpent: '5d/7d',
+      id: 'over-2',
+      name: 'Optimización de consultas de base de datos',
+      startDate: '20 mar',
+      dueDate: '28 mar',
+      duration: '8d',
+      status: 'in-progress',
+      priority: 'medium',
       assignedTo: {
-        name: 'Miguel Torres',
-        initials: 'MT'
+        name: 'Pedro L.',
+        initials: 'PL'
       },
-      description: 'Implementar la autenticación SSO con proveedores externos (Google, Microsoft).'
+      timeSpent: '12h/24h',
+      location: 'Proyecto Beta'
+    },
+    {
+      id: 'over-3',
+      name: 'Corrección de errores reportados en producción',
+      startDate: '25 mar',
+      dueDate: '01 abr',
+      duration: '7d',
+      status: 'in-review',
+      priority: 'high',
+      assignedTo: {
+        name: 'Ana S.',
+        initials: 'AS'
+      },
+      timeSpent: '16h/20h',
+      location: 'Proyecto Gamma'
+    },
+    {
+      id: 'over-4',
+      name: 'Actualización de diseños para la versión móvil',
+      startDate: '22 mar',
+      dueDate: '29 mar',
+      duration: '7d',
+      status: 'in-progress',
+      priority: 'medium',
+      assignedTo: {
+        name: 'Valeria T.',
+        initials: 'VT'
+      },
+      timeSpent: '10h/30h',
+      location: 'Proyecto Beta'
+    },
+    {
+      id: 'over-5',
+      name: 'Implementación de nueva funcionalidad de notificaciones',
+      startDate: '15 mar',
+      dueDate: '25 mar',
+      duration: '10d',
+      status: 'in-review',
+      priority: 'high',
+      assignedTo: {
+        name: 'Luis R.',
+        initials: 'LR'
+      },
+      timeSpent: '35h/40h',
+      location: 'Proyecto Alpha'
     }
   ];
-  
+
+  const upcomingTasks: Task[] = [
+    {
+      id: 'up-1',
+      name: 'Planificación de sprint para el próximo mes',
+      startDate: '15 abr',
+      dueDate: '20 abr',
+      duration: '5d',
+      status: 'new',
+      priority: 'high',
+      assignedTo: {
+        name: 'Carlos P.',
+        initials: 'CP'
+      },
+      timeSpent: '-',
+      location: 'Todos los proyectos'
+    },
+    {
+      id: 'up-2',
+      name: 'Revisión de propuestas de nuevos clientes',
+      startDate: '18 abr',
+      dueDate: '25 abr',
+      duration: '7d',
+      status: 'new',
+      priority: 'medium',
+      assignedTo: {
+        name: 'Ana M.',
+        initials: 'AM'
+      },
+      timeSpent: '-',
+      location: 'Sin proyecto'
+    },
+    {
+      id: 'up-3',
+      name: 'Desarrollo de integración con API de terceros',
+      startDate: '20 abr',
+      dueDate: '30 abr',
+      duration: '10d',
+      status: 'new',
+      priority: 'medium',
+      assignedTo: {
+        name: 'Pedro L.',
+        initials: 'PL'
+      },
+      timeSpent: '-',
+      location: 'Proyecto Beta'
+    },
+    {
+      id: 'up-4',
+      name: 'Preparar documentación para auditoría externa',
+      startDate: '25 abr',
+      dueDate: '05 may',
+      duration: '10d',
+      status: 'new',
+      priority: 'high',
+      assignedTo: {
+        name: 'Mariangel',
+        initials: 'MA'
+      },
+      timeSpent: '-',
+      location: 'Todos los proyectos'
+    },
+    {
+      id: 'up-5',
+      name: 'Implementar nuevo diseño de dashboard',
+      startDate: '15 abr',
+      dueDate: '30 abr',
+      duration: '15d',
+      status: 'new',
+      priority: 'medium',
+      assignedTo: {
+        name: 'Valeria T.',
+        initials: 'VT'
+      },
+      timeSpent: '-',
+      location: 'Proyecto Alpha'
+    }
+  ];
+
   const upcomingEvents: Event[] = [
     {
       id: 'event-1',
-      name: 'Reunión de planificación de sprint',
-      date: '12 abr',
-      time: '10:00',
-      project: {
-        id: 'project-1',
-        name: 'Proyecto 1A: Sistema de Gestión'
-      }
+      name: 'Reunión de equipo',
+      date: '05 abr',
+      time: '09:00 - 10:30',
+      location: 'Sala de conferencias'
     },
     {
       id: 'event-2',
-      name: 'Presentación de avances a stakeholders',
-      date: '15 abr',
-      time: '15:30',
-      project: {
-        id: 'portfolio-1',
-        name: 'Portafolio 1: Suite de Aplicaciones'
-      }
-    }
-  ];
-  
-  const soonToExpireTasks: Task[] = [
-    {
-      id: 'task-9',
-      name: 'Revisión de código para integración continua',
-      startDate: '05 abr',
-      dueDate: '12 abr',
-      status: 'por-vencer',
-      priority: 'media',
-      project: {
-        id: 'project-1',
-        name: 'Proyecto 1A: Sistema de Gestión',
-        path: '/proyecto-1a'
-      },
-      duration: '7d',
-      timeSpent: '5d/7d',
-      assignedTo: {
-        name: 'Laura Sánchez',
-        initials: 'LS'
-      },
-      description: 'Realizar revisión de código para asegurar la calidad antes de la integración continua.'
+      name: 'Presentación a cliente',
+      date: '07 abr',
+      time: '14:00 - 15:30',
+      location: 'Oficina del cliente'
     },
     {
-      id: 'task-10',
-      name: 'Preparación de ambiente de pruebas',
-      startDate: '07 abr',
-      dueDate: '11 abr',
-      status: 'por-vencer',
-      priority: 'alta',
-      project: {
-        id: 'project-1b',
-        name: 'Proyecto 1B: Módulo Complementario',
-        path: '/proyecto-1b'
-      },
-      duration: '4d',
-      timeSpent: '3d/4d',
-      assignedTo: {
-        name: 'Pedro Ramírez',
-        initials: 'PR'
-      },
-      description: 'Preparar el ambiente de pruebas para la próxima versión del sistema.'
+      id: 'event-3',
+      name: 'Revisión de sprint',
+      date: '10 abr',
+      time: '11:00 - 12:30',
+      location: 'Sala de reuniones'
+    },
+    {
+      id: 'event-4',
+      name: 'Taller de innovación',
+      date: '12 abr',
+      time: '15:00 - 17:00',
+      location: 'Espacio creativo'
     }
   ];
-  
-  const allTasks = [...pendingTasks, ...inProgressTasks, ...overdueTasks, ...soonToExpireTasks];
-  
-  const selectedTask = allTasks.find(task => task.id === selectedTaskId);
-  
-  const getStatusBadge = (status: Task['status']) => {
-    const statusText = {
-      'no-iniciado': 'No iniciado',
-      'en-progreso': 'En progreso',
-      'completado': 'Completado',
-      'retrasado': 'Retrasado',
-      'por-vencer': 'Por vencer'
-    };
-    
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${statusColors[status]}`}>
-        {statusText[status]}
-      </span>
-    );
-  };
-  
-  const getPriorityBadge = (priority: Task['priority']) => {
-    const priorityText = {
-      'alta': 'Alta',
-      'media': 'Media',
-      'baja': 'Baja'
-    };
-    
-    return (
-      <span className={`inline-flex items-center gap-1.5 ${priorityColors[priority]}`}>
-        <Flag className="h-3.5 w-3.5" />
-        <span>{priorityText[priority]}</span>
-      </span>
-    );
-  };
-  
-  const getLocationTag = (project: Task['project']) => {
-    if (!project) {
-      return <Badge variant="outline" className="bg-slate-100">Sin proyecto</Badge>;
-    }
-    
-    return (
-      <Badge 
-        variant="outline" 
-        className="bg-blue-50 text-blue-700 hover:bg-blue-100 truncate max-w-[200px]"
-      >
-        <span className="truncate relative pr-6 after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-blue-50">
-          {project.name}
-        </span>
-      </Badge>
-    );
-  };
-  
-  const renderTaskRow = (task: Task) => (
-    <TableRow 
-      key={task.id}
-      className={`hover:bg-muted/40 cursor-pointer ${selectedTaskId === task.id ? 'bg-muted/60' : ''}`}
-      onClick={() => setSelectedTaskId(task.id)}
-    >
-      <TableCell className="font-medium">
-        <div className="truncate relative pr-6 max-w-[300px]">
-          <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
-            {task.name}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell className="whitespace-nowrap">{task.startDate}</TableCell>
-      <TableCell className="whitespace-nowrap">{task.dueDate}</TableCell>
-      <TableCell>{task.duration}</TableCell>
-      <TableCell>{getStatusBadge(task.status)}</TableCell>
-      <TableCell>{getPriorityBadge(task.priority)}</TableCell>
-      <TableCell>
-        <div className="truncate relative pr-6 max-w-[180px]">
-          <a 
-            href={task.project?.path || "/tareas-sin-proyecto"} 
-            className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {task.project ? task.project.name : "Sin proyecto"}
-          </a>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
 
-  const renderPendingTaskTable = () => (
-    <div className="px-0">
-      <ScrollArea className="h-[280px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Inicio</TableHead>
-              <TableHead>Fin</TableHead>
-              <TableHead>Duración</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Prioridad</TableHead>
-              <TableHead>Ubicación</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pendingTasks.map(renderTaskRow)}
-          </TableBody>
-        </Table>
-      </ScrollArea>
-    </div>
-  );
-  
-  const renderInProgressTaskTable = () => (
-    <div className="px-0">
-      <ScrollArea className="h-[280px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Inicio</TableHead>
-              <TableHead>Fin</TableHead>
-              <TableHead>Duración</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Prioridad</TableHead>
-              <TableHead>Ubicación</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {inProgressTasks.map(renderTaskRow)}
-          </TableBody>
-        </Table>
-      </ScrollArea>
-    </div>
-  );
-  
-  const renderOverdueTaskTable = () => (
-    <div className="px-0">
-      <ScrollArea className="h-[280px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Inicio</TableHead>
-              <TableHead>Fin</TableHead>
-              <TableHead>Duración</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Prioridad</TableHead>
-              <TableHead>Ubicación</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {overdueTasks.map(renderTaskRow)}
-          </TableBody>
-        </Table>
-      </ScrollArea>
-    </div>
-  );
-  
-  const renderUpcomingEventsTable = () => (
-    <div className="px-0">
-      <ScrollArea className="h-[280px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[70%]">Evento</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Hora</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {upcomingEvents.map(event => (
-              <TableRow key={event.id} className="hover:bg-muted/40">
-                <TableCell className="font-medium">
-                  <div className="truncate relative pr-6 max-w-[250px]">
-                    <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
-                      {event.name}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">{event.date}</TableCell>
-                <TableCell className="whitespace-nowrap">{event.time}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </ScrollArea>
-    </div>
-  );
-  
-  const renderSoonToExpireTaskTable = () => (
-    <div className="px-0">
-      <ScrollArea className="h-[280px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Inicio</TableHead>
-              <TableHead>Fin</TableHead>
-              <TableHead>Duración</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Prioridad</TableHead>
-              <TableHead>Ubicación</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {soonToExpireTasks.map(renderTaskRow)}
-          </TableBody>
-        </Table>
-      </ScrollArea>
-    </div>
-  );
-  
-  const tasksByStatus = {
-    'no-iniciado': [...pendingTasks],
-    'en-progreso': [...inProgressTasks],
-    'completado': [
-      {
-        id: 'task-11',
-        name: 'Configuración de entorno de desarrollo',
-        startDate: '01 abr',
-        dueDate: '03 abr',
-        status: 'completado',
-        priority: 'media',
-        project: {
-          id: 'project-1',
-          name: 'Proyecto 1A: Sistema de Gestión',
-          path: '/proyecto-1a'
-        },
-        duration: '2d',
-        timeSpent: '2d/2d',
-        assignedTo: {
-          name: 'Juan Pérez',
-          initials: 'JP'
-        },
-        description: 'Configurar el entorno de desarrollo para el nuevo equipo.'
-      },
-      {
-        id: 'task-12',
-        name: 'Documentación de API para desarrolladores',
-        startDate: '02 abr',
-        dueDate: '04 abr',
-        status: 'completado',
-        priority: 'baja',
-        project: {
-          id: 'project-1b',
-          name: 'Proyecto 1B: Módulo Complementario',
-          path: '/proyecto-1b'
-        },
-        duration: '2d',
-        timeSpent: '2d/2d',
-        assignedTo: {
-          name: 'Laura Sánchez',
-          initials: 'LS'
-        },
-        description: 'Crear documentación de API para nuevos desarrolladores.'
-      }
-    ]
-  };
+  // Group tasks by status for Kanban view
+  const tasksByStatus = pendingTasks.reduce((acc, task) => {
+    if (!acc[task.status]) {
+      acc[task.status] = [];
+    }
+    acc[task.status].push(task);
+    return acc;
+  }, {} as Record<string, Task[]>);
   
   const kanbanColumns = [
-    { id: 'no-iniciado', title: 'No iniciado', tasks: tasksByStatus['no-iniciado'] || [] },
-    { id: 'en-progreso', title: 'En progreso', tasks: tasksByStatus['en-progreso'] || [] },
-    { id: 'completado', title: 'Completado', tasks: tasksByStatus['completado'] || [] },
+    { id: 'new', title: 'Nuevo', tasks: tasksByStatus['new'] || [] },
+    { id: 'in-progress', title: 'En progreso', tasks: tasksByStatus['in-progress'] || [] },
+    { id: 'in-review', title: 'En revisión', tasks: tasksByStatus['in-review'] || [] },
+    { id: 'completed', title: 'Completado', tasks: tasksByStatus['completed'] || [] },
   ];
-  
+
+  const getStatusBadge = (status: Task['status']) => {
+    return (
+      <span className={`task-status-pill status-${status} whitespace-nowrap`}>
+        {statusLabels[status]}
+      </span>
+    );
+  };
+
+  const getPriorityBadge = (priority: Task['priority']) => {
+    return (
+      <span className={`inline-flex items-center gap-1.5 text-priority-${priority}`}>
+        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+          <path
+            d="M12 7.75V12.25M12 16.25V16.26M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span>{priorityLabels[priority]}</span>
+      </span>
+    );
+  };
+
+  const selectedTask = pendingTasks.find(task => task.id === selectedTaskId) || 
+                        overdueTasks.find(task => task.id === selectedTaskId) || 
+                        upcomingTasks.find(task => task.id === selectedTaskId);
+
   const AddTaskDialog = () => (
     <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
       <DialogContent className="sm:max-w-[550px]">
@@ -579,9 +419,10 @@ export default function MyTasks() {
                   <SelectValue placeholder="Seleccione un estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="no-iniciado">No iniciado</SelectItem>
-                  <SelectItem value="en-progreso">En progreso</SelectItem>
-                  <SelectItem value="completado">Completado</SelectItem>
+                  <SelectItem value="new">Nuevo</SelectItem>
+                  <SelectItem value="in-progress">En progreso</SelectItem>
+                  <SelectItem value="in-review">En revisión</SelectItem>
+                  <SelectItem value="completed">Completado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -592,30 +433,12 @@ export default function MyTasks() {
                   <SelectValue placeholder="Seleccione una prioridad" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="media">Media</SelectItem>
-                  <SelectItem value="baja">Baja</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
+                  <SelectItem value="medium">Media</SelectItem>
+                  <SelectItem value="low">Baja</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="duration">Duración</Label>
-            <Input id="duration" placeholder="Ej: 3d" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="project">Proyecto</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccione un proyecto" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sin-proyecto">Sin proyecto</SelectItem>
-                <SelectItem value="project-1">Proyecto 1A: Sistema de Gestión</SelectItem>
-                <SelectItem value="project-1b">Proyecto 1B: Módulo Complementario</SelectItem>
-                <SelectItem value="portfolio-1">Portafolio 1: Suite de Aplicaciones</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description">Descripción</Label>
@@ -627,88 +450,42 @@ export default function MyTasks() {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setIsAddTaskOpen(false)}>Cancelar</Button>
+          <DialogClose asChild>
+            <Button variant="outline">Cancelar</Button>
+          </DialogClose>
           <Button>Guardar tarea</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 
-  const AddEventDialog = () => (
-    <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-      <DialogContent className="sm:max-w-[550px]">
-        <DialogHeader>
-          <DialogTitle>Agregar nuevo evento</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="event-name">Nombre del evento</Label>
-            <Input id="event-name" placeholder="Ingrese el nombre del evento" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="event-date">Fecha</Label>
-              <Input id="event-date" type="date" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="event-time">Hora</Label>
-              <Input id="event-time" type="time" />
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="event-project">Proyecto</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccione un proyecto" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sin-proyecto">Sin proyecto</SelectItem>
-                <SelectItem value="project-1">Proyecto 1A: Sistema de Gestión</SelectItem>
-                <SelectItem value="project-1b">Proyecto 1B: Módulo Complementario</SelectItem>
-                <SelectItem value="portfolio-1">Portafolio 1: Suite de Aplicaciones</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>Cancelar</Button>
-          <Button>Guardar evento</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-7xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Mis tareas</h1>
-          <p className="text-muted-foreground">
-            Gestiona tus tareas y eventos pendientes
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="mr-2 h-4 w-4" />
-                Agregar
-                <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem onClick={() => setIsAddTaskOpen(true)}>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Nueva tarea
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsAddEventOpen(true)}>
-                <Calendar className="mr-2 h-4 w-4" />
-                Nuevo evento
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <div className="container py-6 max-w-7xl">
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold">Mis tareas</h1>
+        <p className="text-muted-foreground">Gestiona tus tareas en todos los proyectos</p>
+      </div>
+
+      <div className="flex items-center justify-between mb-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Agregar
+              <ChevronDown className="h-4 w-4 opacity-70" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => setIsAddTaskOpen(true)}>
+              <span>Nueva tarea</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <span>Nuevo evento</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
           
+        <div className="flex items-center gap-4">
           <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'list' | 'kanban')}>
             <TabsList>
               <TabsTrigger value="list" className="flex items-center gap-1.5">
@@ -721,116 +498,248 @@ export default function MyTasks() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Filter className="h-4 w-4" />
+              Filtrar
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <SortDesc className="h-4 w-4" />
+              Ordenar
+            </Button>
+          </div>
         </div>
       </div>
+    
+      <Tabs value={activeView} className="space-y-4">
+        <TabsContent value="list" className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Tareas pendientes */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Tareas pendientes</h2>
+                  <span className="text-muted-foreground text-sm">{pendingTasks.length} tareas</span>
+                </div>
+                <div className="border rounded-md shadow-sm">
+                  <ScrollArea className="h-[360px]">
+                    <Table>
+                      <TableHeader className="bg-muted/50">
+                        <TableRow>
+                          <TableHead className="w-[240px]">Nombre</TableHead>
+                          <TableHead>Inicio</TableHead>
+                          <TableHead>Fin</TableHead>
+                          <TableHead>Duración</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead>Prioridad</TableHead>
+                          <TableHead>Ubicación</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pendingTasks.map((task) => (
+                          <TableRow 
+                            key={task.id}
+                            className="hover:bg-muted/40 cursor-pointer"
+                            onClick={() => setSelectedTaskId(task.id)}
+                          >
+                            <TableCell className="font-medium">
+                              <div className="truncate relative max-w-[200px] pr-6">
+                                <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-12 after:bg-gradient-to-r after:from-transparent after:to-background">
+                                  {task.name}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>{task.startDate}</TableCell>
+                            <TableCell>{task.dueDate}</TableCell>
+                            <TableCell>{task.duration}</TableCell>
+                            <TableCell>{getStatusBadge(task.status)}</TableCell>
+                            <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                            <TableCell>
+                              <div className="truncate relative max-w-[120px] pr-6">
+                                <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-8 after:bg-gradient-to-r after:from-transparent after:to-background">
+                                  {task.location}
+                                </span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                </div>
+              </div>
 
-      <div className="flex flex-wrap gap-2 items-center">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 gap-1">
-              <Filter className="h-3.5 w-3.5" />
-              <span>Filtrar</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="start">
-            <DropdownMenuItem onSelect={() => setSelectedFilter('estado')}>
-              Estado
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setSelectedFilter('prioridad')}>
-              Prioridad
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setSelectedFilter('proyecto')}>
-              Proyecto
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 gap-1">
-              <SortDesc className="h-3.5 w-3.5" />
-              <span>Ordenar</span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="start">
-            <DropdownMenuItem onSelect={() => setSelectedSort('prioridad-alta-baja')}>
-              Prioridad (alta a baja)
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setSelectedSort('prioridad-baja-alta')}>
-              Prioridad (baja a alta)
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setSelectedSort('nombre')}>
-              Nombre
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      
-      <Tabs value={activeView} className="mt-0 space-y-6">
-        <TabsContent value="list" className="mt-0 space-y-6">
-          <div className="grid grid-cols-4 gap-6">
-            <div className="col-span-3">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Tareas pendientes</CardTitle>
-                </CardHeader>
-                <CardContent className="px-0">
-                  {renderPendingTaskTable()}
-                </CardContent>
-              </Card>
+              {/* Próximos eventos */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Próximos eventos</h2>
+                  <span className="text-muted-foreground text-sm">{upcomingEvents.length} eventos</span>
+                </div>
+                <div className="border rounded-md p-4 h-[360px]">
+                  <div className="grid gap-3">
+                    {upcomingEvents.map((event) => (
+                      <div key={event.id} className="p-3 border rounded-md hover:shadow-sm transition-shadow">
+                        <div className="flex items-start gap-3">
+                          <div className="bg-primary/10 text-primary rounded-md p-2 text-center min-w-[50px]">
+                            <div className="text-sm font-medium">{event.date.split(' ')[0]}</div>
+                            <div className="text-xs">{event.date.split(' ')[1]}</div>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium truncate">{event.name}</h3>
+                            <div className="flex items-center text-xs text-muted-foreground mt-1">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {event.time}
+                            </div>
+                            <div className="flex items-center text-xs text-muted-foreground mt-1">
+                              <span className="truncate relative max-w-[200px]">
+                                {event.location}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="col-span-1">
-              <Card className="h-full">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Próximos eventos</CardTitle>
-                </CardHeader>
-                <CardContent className="px-0">
-                  {renderUpcomingEventsTable()}
-                </CardContent>
-              </Card>
+
+            {/* Tareas vencidas */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Tareas vencidas</h2>
+                <span className="text-muted-foreground text-sm">{overdueTasks.length} tareas</span>
+              </div>
+              <div className="border rounded-md shadow-sm">
+                <ScrollArea className="h-[250px]">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="w-[240px]">Nombre</TableHead>
+                        <TableHead>Inicio</TableHead>
+                        <TableHead>Fin</TableHead>
+                        <TableHead>Duración</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Prioridad</TableHead>
+                        <TableHead>Ubicación</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {overdueTasks.map((task) => (
+                        <TableRow 
+                          key={task.id}
+                          className="hover:bg-muted/40 cursor-pointer"
+                          onClick={() => setSelectedTaskId(task.id)}
+                        >
+                          <TableCell className="font-medium">
+                            <div className="truncate relative max-w-[200px] pr-6">
+                              <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-12 after:bg-gradient-to-r after:from-transparent after:to-background">
+                                {task.name}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{task.startDate}</TableCell>
+                          <TableCell>{task.dueDate}</TableCell>
+                          <TableCell>{task.duration}</TableCell>
+                          <TableCell>{getStatusBadge(task.status)}</TableCell>
+                          <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                          <TableCell>
+                            <div className="truncate relative max-w-[120px] pr-6">
+                              <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-8 after:bg-gradient-to-r after:from-transparent after:to-background">
+                                {task.location}
+                              </span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </div>
+            </div>
+
+            {/* Tareas por vencer */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Tareas por vencer</h2>
+                <span className="text-muted-foreground text-sm">{upcomingTasks.length} tareas</span>
+              </div>
+              <div className="border rounded-md shadow-sm">
+                <ScrollArea className="h-[250px]">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="w-[240px]">Nombre</TableHead>
+                        <TableHead>Inicio</TableHead>
+                        <TableHead>Fin</TableHead>
+                        <TableHead>Duración</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Prioridad</TableHead>
+                        <TableHead>Ubicación</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {upcomingTasks.map((task) => (
+                        <TableRow 
+                          key={task.id}
+                          className="hover:bg-muted/40 cursor-pointer"
+                          onClick={() => setSelectedTaskId(task.id)}
+                        >
+                          <TableCell className="font-medium">
+                            <div className="truncate relative max-w-[200px] pr-6">
+                              <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-12 after:bg-gradient-to-r after:from-transparent after:to-background">
+                                {task.name}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{task.startDate}</TableCell>
+                          <TableCell>{task.dueDate}</TableCell>
+                          <TableCell>{task.duration}</TableCell>
+                          <TableCell>{getStatusBadge(task.status)}</TableCell>
+                          <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                          <TableCell>
+                            <div className="truncate relative max-w-[120px] pr-6">
+                              <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-8 after:bg-gradient-to-r after:from-transparent after:to-background">
+                                {task.location}
+                              </span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </div>
             </div>
           </div>
-          
-          <div className="grid grid-cols-2 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Tareas vencidas</CardTitle>
-              </CardHeader>
-              <CardContent className="px-0">
-                {renderOverdueTaskTable()}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Tareas por vencer</CardTitle>
-              </CardHeader>
-              <CardContent className="px-0">
-                {renderSoonToExpireTaskTable()}
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Tareas en progreso</CardTitle>
-            </CardHeader>
-            <CardContent className="px-0">
-              {renderInProgressTaskTable()}
-            </CardContent>
-          </Card>
         </TabsContent>
         
-        <TabsContent value="kanban" className="mt-0">
-          <div className="flex gap-6 overflow-x-auto pb-4">
+        <TabsContent value="kanban" className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Agregar tarea
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Filter className="h-4 w-4" />
+                Filtrar
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <SortDesc className="h-4 w-4" />
+                Ordenar
+              </Button>
+            </div>
+          </div>
+          
+          <div className="flex gap-4 overflow-auto pb-4">
             {kanbanColumns.map((column) => (
-              <div key={column.id} className="flex-shrink-0 w-[350px]">
+              <div key={column.id} className="flex-1 min-w-[280px] max-w-[320px]">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${column.id === 'no-iniciado' ? 'bg-slate-400' : column.id === 'en-progreso' ? 'bg-blue-400' : 'bg-green-400'}`}></div>
+                    <div className={`w-3 h-3 rounded-full bg-status-${column.id}`}></div>
                     <h3 className="font-medium">{column.title}</h3>
                     <span className="bg-muted rounded-full px-2 text-xs text-muted-foreground">
                       {column.tasks.length}
@@ -855,12 +764,18 @@ export default function MyTasks() {
                     >
                       <CardContent className="p-3">
                         <h4 className="font-medium text-sm mb-2 truncate relative pr-6">
-                          <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                          <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-12 after:bg-gradient-to-r after:from-transparent after:to-background/90">
                             {task.name}
                           </span>
                         </h4>
                         
-                        <div className="flex items-center justify-between mb-2">
+                        {task.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                            {task.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1 text-muted-foreground text-xs">
                             <Calendar className="h-3 w-3" />
                             <span>Inicio: {task.startDate}</span>
@@ -872,7 +787,7 @@ export default function MyTasks() {
                           </div>
                         </div>
                         
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mt-1">
                           <div className="flex items-center gap-1 text-muted-foreground text-xs">
                             <Clock className="h-3 w-3" />
                             <span>Duración: {task.duration}</span>
@@ -885,21 +800,20 @@ export default function MyTasks() {
                         </div>
                         
                         <div className="flex items-center justify-between mt-2 pt-2 border-t">
-                          <Badge variant="outline" className={`${priorityColors[task.priority]} text-[10px] px-1.5`}>
-                            {task.priority === 'alta' ? 'Alta' : task.priority === 'media' ? 'Media' : 'Baja'}
-                          </Badge>
-                          
-                          <div className="truncate max-w-[200px] text-xs text-blue-600">
-                            <a 
-                              href={task.project?.path || "/tareas-sin-proyecto"} 
-                              className="hover:underline truncate relative pr-6 inline-block"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-blue-50">
-                                {task.project ? task.project.name : "Sin proyecto"}
-                              </span>
-                            </a>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className={`text-priority-${task.priority} text-[10px] px-1.5`}>
+                              {priorityLabels[task.priority]}
+                            </Badge>
                           </div>
+                          {task.assignedTo ? (
+                            <Avatar className="h-6 w-6 bg-primary">
+                              <span className="text-[10px]">{task.assignedTo.initials}</span>
+                            </Avatar>
+                          ) : (
+                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
+                              <UserPlus className="h-3.5 w-3.5 text-muted-foreground" />
+                            </Button>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -927,97 +841,32 @@ export default function MyTasks() {
       </Tabs>
       
       {selectedTaskId && selectedTask && (
-        <div className="fixed inset-y-0 right-0 w-[50%] bg-background border-l shadow-lg z-40 overflow-y-auto">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute top-4 right-4 z-50"
-            onClick={() => setSelectedTaskId(null)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6">{selectedTask.name}</h2>
-            
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">Estado</h3>
-                {getStatusBadge(selectedTask.status)}
-              </div>
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">Prioridad</h3>
-                {getPriorityBadge(selectedTask.priority)}
-              </div>
+        <Drawer open={!!selectedTaskId} onOpenChange={(open) => !open && setSelectedTaskId(null)}>
+          <DrawerContent className="max-w-3xl mx-auto">
+            <div className="max-h-[85vh] overflow-y-auto">
+              <TaskDetails 
+                task={{
+                  id: selectedTask.id,
+                  name: selectedTask.name,
+                  startDate: selectedTask.startDate,
+                  endDate: selectedTask.dueDate,
+                  duration: selectedTask.duration,
+                  status: selectedTask.status,
+                  priority: selectedTask.priority,
+                  assignedTo: selectedTask.assignedTo || {
+                    name: 'Sin asignar',
+                    initials: 'SA'
+                  },
+                  timeSpent: selectedTask.timeSpent,
+                }}
+                onClose={() => setSelectedTaskId(null)}
+              />
             </div>
-            
-            <div className="mb-6">
-              <h3 className="font-medium text-sm text-muted-foreground mb-2">Asignado a</h3>
-              <div className="flex items-center gap-2">
-                {selectedTask.assignedTo ? (
-                  <>
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>{selectedTask.assignedTo.initials}</AvatarFallback>
-                    </Avatar>
-                    <span>{selectedTask.assignedTo.name}</span>
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">No asignado</span>
-                )}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-6 mb-6">
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">Fecha de inicio</h3>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedTask.startDate}</span>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">Fecha de fin</h3>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedTask.dueDate}</span>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">Duración</h3>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedTask.duration}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="font-medium text-sm text-muted-foreground mb-2">Proyecto</h3>
-              <div>
-                {selectedTask.project ? (
-                  <a 
-                    href={selectedTask.project.path} 
-                    className="text-blue-600 hover:underline"
-                  >
-                    {selectedTask.project.name}
-                  </a>
-                ) : (
-                  <span className="text-muted-foreground">Sin proyecto</span>
-                )}
-              </div>
-            </div>
-            
-            {selectedTask.description && (
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">Descripción</h3>
-                <p className="text-sm">{selectedTask.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
+          </DrawerContent>
+        </Drawer>
       )}
       
       <AddTaskDialog />
-      <AddEventDialog />
     </div>
   );
 }
