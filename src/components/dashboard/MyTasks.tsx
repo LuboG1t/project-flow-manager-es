@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDown, Calendar, Filter, SortDesc, Plus, Clock, AlertTriangle, Link as LinkIcon } from 'lucide-react';
+import { Calendar, Filter, SortDesc, Plus, Clock, AlertTriangle, Link as LinkIcon, ChevronDown, Plus as PlusIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -26,6 +27,17 @@ import {
 } from "@/components/ui/select";
 import { Link } from 'react-router-dom';
 import { TaskDetails } from '../project/TaskDetails';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Label } from '@/components/ui/label';
 
 interface Task {
   id: string;
@@ -33,14 +45,14 @@ interface Task {
   startDate: string;
   dueDate: string;
   duration: string;
-  status: 'completed' | 'in-progress' | 'in-review' | 'new';
+  status: 'no-iniciado' | 'en-progreso' | 'completado';
   priority: 'high' | 'medium' | 'low';
   location?: string;
   projectLink?: string;
   timeSpent: string;
 }
 
-interface Milestone {
+interface Event {
   id: string;
   name: string;
   date: string;
@@ -50,10 +62,9 @@ interface Milestone {
 }
 
 const statusLabels = {
-  'completed': 'Completado',
-  'in-progress': 'En progreso',
-  'in-review': 'En revisión',
-  'new': 'Nuevo'
+  'no-iniciado': 'No iniciado',
+  'en-progreso': 'En progreso',
+  'completado': 'Completado'
 };
 
 const priorityLabels = {
@@ -74,42 +85,64 @@ export default function MyTasks() {
   const [editingCell, setEditingCell] = useState<{id: string, field: string} | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
+  const [newTask, setNewTask] = useState({
+    name: '',
+    startDate: '',
+    dueDate: '',
+    duration: '',
+    priority: 'medium',
+    timeEstimate: '',
+    project: 'sin-proyecto'
+  });
   
   // Datos de tareas
   const taskGroups: Record<string, Task[]> = {
     overdue: [
       {
-        id: 'task-2',
-        name: 'Tarea 1',
+        id: 'task-10',
+        name: 'Actualizar documentación técnica',
         startDate: '20 abr 2025',
         dueDate: '22 abr 2025',
         duration: '3d',
-        status: 'in-progress',
+        status: 'en-progreso',
         priority: 'high',
         location: 'Portafolio 1 / Proyecto 1A',
         projectLink: '/projects/1a',
-        timeSpent: '10h/72h'
+        timeSpent: '2h/8h'
       },
       {
-        id: 'task-3',
-        name: 'Tarea 2',
+        id: 'task-11',
+        name: 'Corregir errores de interfaz',
         startDate: '18 abr 2025',
         dueDate: '21 abr 2025',
         duration: '4d',
-        status: 'in-review',
+        status: 'en-progreso',
         priority: 'medium',
         location: 'Sin proyecto',
         timeSpent: '8h/16h'
-      }
+      },
+      {
+        id: 'task-12',
+        name: 'Preparar reporte semanal',
+        startDate: '24 abr 2025',
+        dueDate: '24 abr 2025',
+        duration: '1d',
+        status: 'completado',
+        priority: 'high',
+        location: 'Portafolio 1 / Proyecto 1A',
+        projectLink: '/projects/1a',
+        timeSpent: '8h/8h'
+      },
     ],
     upcoming: [
       {
         id: 'task-4',
-        name: 'Tarea 3',
+        name: 'Desarrollar funcionalidad de búsqueda',
         startDate: '24 abr 2025',
         dueDate: '28 abr 2025',
         duration: '5d',
-        status: 'new',
+        status: 'no-iniciado',
         priority: 'low',
         location: 'Portafolio 1 / Proyecto 1A',
         projectLink: '/projects/1a',
@@ -119,46 +152,70 @@ export default function MyTasks() {
     pending: [
       {
         id: 'task-1',
-        name: 'Tarea 4',
+        name: 'Diseñar componentes de UI',
         startDate: '24 abr 2025',
         dueDate: '24 abr 2025',
         duration: '1d',
-        status: 'in-progress',
+        status: 'no-iniciado',
         priority: 'high',
         location: 'Portafolio 1 / Proyecto 1A',
         projectLink: '/projects/1a',
-        timeSpent: '2h/8h'
+        timeSpent: '-'
       },
       {
-        id: 'subtask-1',
-        name: 'Subtarea 1',
+        id: 'task-2',
+        name: 'Revisión de código',
         startDate: '24 abr 2025',
         dueDate: '24 abr 2025',
         duration: '1d',
-        status: 'completed',
-        priority: 'high',
-        location: 'Portafolio 1 / Proyecto 1A',
-        projectLink: '/projects/1a',
-        timeSpent: '8h/8h'
-      },
-      {
-        id: 'subtask-2',
-        name: 'Subtarea 2',
-        startDate: '24 abr 2025',
-        dueDate: '24 abr 2025',
-        duration: '1d',
-        status: 'completed',
+        status: 'no-iniciado',
         priority: 'high',
         location: 'Sin proyecto',
-        timeSpent: '8h/8h'
-      }
+        timeSpent: '-'
+      },
+      {
+        id: 'task-3',
+        name: 'Configuración de entorno de pruebas',
+        startDate: '24 abr 2025',
+        dueDate: '24 abr 2025',
+        duration: '1d',
+        status: 'no-iniciado',
+        priority: 'medium',
+        location: 'Portafolio 1 / Proyecto 1A',
+        projectLink: '/projects/1a',
+        timeSpent: '-'
+      },
+      {
+        id: 'task-5',
+        name: 'Planificación sprint siguiente',
+        startDate: '24 abr 2025',
+        dueDate: '24 abr 2025',
+        duration: '1d',
+        status: 'no-iniciado',
+        priority: 'high',
+        location: 'Portafolio 1 / Proyecto 1A',
+        projectLink: '/projects/1a',
+        timeSpent: '-'
+      },
+      {
+        id: 'task-6',
+        name: 'Análisis de requisitos',
+        startDate: '24 abr 2025',
+        dueDate: '24 abr 2025',
+        duration: '1d',
+        status: 'no-iniciado',
+        priority: 'high',
+        location: 'Portafolio 1 / Proyecto 1B',
+        projectLink: '/projects/1b',
+        timeSpent: '-'
+      },
     ]
   };
 
-  // Datos de hitos próximos
-  const upcomingMilestones: Milestone[] = [
+  // Datos de eventos próximos
+  const upcomingEvents: Event[] = [
     {
-      id: 'milestone-1',
+      id: 'event-1',
       name: 'Reunión de Inicio de Proyecto',
       date: '25 abr 2025',
       time: '10:00 - 11:30',
@@ -166,14 +223,14 @@ export default function MyTasks() {
       projectLink: '/projects/1a'
     },
     {
-      id: 'milestone-2',
+      id: 'event-2',
       name: 'Entrega de Diseños',
       date: '27 abr 2025',
       project: 'Proyecto 1B',
       projectLink: '/projects/1b'
     },
     {
-      id: 'milestone-3',
+      id: 'event-3',
       name: 'Revisión de Avances',
       date: '29 abr 2025',
       time: '15:00 - 16:00',
@@ -181,7 +238,7 @@ export default function MyTasks() {
       projectLink: '/projects/1a'
     },
     {
-      id: 'milestone-4',
+      id: 'event-4',
       name: 'Reunión con Cliente',
       date: '2 may 2025',
       time: '09:00 - 10:30',
@@ -200,10 +257,9 @@ export default function MyTasks() {
   }, {} as Record<string, Task[]>);
   
   const kanbanColumns = [
-    { id: 'new', title: 'Nuevo', tasks: tasksByStatus['new'] || [] },
-    { id: 'in-progress', title: 'En progreso', tasks: tasksByStatus['in-progress'] || [] },
-    { id: 'in-review', title: 'En revisión', tasks: tasksByStatus['in-review'] || [] },
-    { id: 'completed', title: 'Completado', tasks: tasksByStatus['completed'] || [] },
+    { id: 'no-iniciado', title: 'No iniciado', tasks: tasksByStatus['no-iniciado'] || [] },
+    { id: 'en-progreso', title: 'En progreso', tasks: tasksByStatus['en-progreso'] || [] },
+    { id: 'completado', title: 'Completado', tasks: tasksByStatus['completado'] || [] },
   ];
 
   const selectedTask = Object.values(taskGroups).flat().find(task => task.id === selectedTaskId);
@@ -218,6 +274,19 @@ export default function MyTasks() {
     // Aquí iría la lógica para guardar el cambio
     console.log("Guardar cambio:", editingCell, editValue);
     setEditingCell(null);
+  };
+
+  const handleNewTaskChange = (field: string, value: string) => {
+    setNewTask(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleCreateTask = () => {
+    console.log("Nueva tarea creada:", newTask);
+    setIsNewTaskDialogOpen(false);
+    // Aquí iría la lógica para crear la tarea
   };
 
   const renderStatusBadge = (status: Task['status']) => {
@@ -305,10 +374,9 @@ export default function MyTasks() {
             <SelectValue placeholder="Seleccionar estado" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="new">Nuevo</SelectItem>
-            <SelectItem value="in-progress">En progreso</SelectItem>
-            <SelectItem value="in-review">En revisión</SelectItem>
-            <SelectItem value="completed">Completado</SelectItem>
+            <SelectItem value="no-iniciado">No iniciado</SelectItem>
+            <SelectItem value="en-progreso">En progreso</SelectItem>
+            <SelectItem value="completado">Completado</SelectItem>
           </SelectContent>
         </Select>
       );
@@ -380,7 +448,7 @@ export default function MyTasks() {
     );
   };
 
-  const renderTaskTable = (tasks: Task[], title: string) => {
+  const renderTaskTable = (tasks: Task[], title: string, showAllColumns = true) => {
     return (
       <Card className="w-full">
         <CardHeader className="pb-2">
@@ -397,12 +465,16 @@ export default function MyTasks() {
                 <TableHead>Estado</TableHead>
                 <TableHead>Prioridad</TableHead>
                 <TableHead>Ubicación</TableHead>
-                <TableHead>Tiempo empleado</TableHead>
+                {showAllColumns && <TableHead>Tiempo empleado</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {tasks.map((task) => (
-                <TableRow key={task.id} className="hover:bg-muted/40" onClick={() => setSelectedTaskId(task.id)}>
+                <TableRow 
+                  key={task.id} 
+                  className="hover:bg-muted/40 cursor-pointer" 
+                  onClick={() => setSelectedTaskId(task.id)}
+                >
                   <TableCell className="font-medium">
                     {task.name.startsWith('Sub') ? (
                       <span className="inline-block ml-6">{task.name}</span>
@@ -428,7 +500,9 @@ export default function MyTasks() {
                       task.location
                     )}
                   </TableCell>
-                  <TableCell className="group">{renderEditableTime(task.id, task.timeSpent)}</TableCell>
+                  {showAllColumns && (
+                    <TableCell className="group">{renderEditableTime(task.id, task.timeSpent)}</TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -438,45 +512,45 @@ export default function MyTasks() {
     );
   };
 
-  const renderMilestones = () => {
+  const renderEvents = () => {
     return (
       <Card className="h-full">
         <CardHeader>
           <CardTitle className="text-lg font-medium flex items-center gap-2">
             <Calendar className="h-5 w-5 text-muted-foreground" />
-            Próximos Hitos
+            Próximos eventos
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
-            {upcomingMilestones.map((milestone) => (
-              <div key={milestone.id} className="p-4 flex items-start gap-3 hover:bg-muted/50">
+            {upcomingEvents.map((event) => (
+              <div key={event.id} className="p-4 flex items-start gap-3 hover:bg-muted/50">
                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <Calendar className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">{milestone.name}</p>
+                  <p className="font-medium">{event.name}</p>
                   <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      {milestone.date}
+                      {event.date}
                     </span>
-                    {milestone.time && (
+                    {event.time && (
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        {milestone.time}
+                        {event.time}
                       </span>
                     )}
                   </div>
-                  {milestone.project && (
+                  {event.project && (
                     <p className="text-xs text-blue-600 hover:underline mt-1">
-                      {milestone.projectLink ? (
-                        <Link to={milestone.projectLink} className="flex items-center gap-1">
-                          {milestone.project}
+                      {event.projectLink ? (
+                        <Link to={event.projectLink} className="flex items-center gap-1">
+                          {event.project}
                           <LinkIcon className="h-3 w-3" />
                         </Link>
                       ) : (
-                        milestone.project
+                        event.project
                       )}
                     </p>
                   )}
@@ -504,17 +578,22 @@ export default function MyTasks() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
-                  <TableHead>Vencimiento</TableHead>
+                  <TableHead>Fecha inicio</TableHead>
+                  <TableHead>Fecha vencimiento</TableHead>
+                  <TableHead>Duración</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Prioridad</TableHead>
-                  <TableHead>Proyecto</TableHead>
+                  <TableHead>Ubicación</TableHead>
+                  <TableHead>Tiempo empleado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {taskGroups.overdue.map((task) => (
-                  <TableRow key={task.id} onClick={() => setSelectedTaskId(task.id)}>
+                  <TableRow key={task.id} className="cursor-pointer" onClick={() => setSelectedTaskId(task.id)}>
                     <TableCell>{task.name}</TableCell>
+                    <TableCell className="group">{renderEditableDate(task.id, task.startDate, 'startDate')}</TableCell>
                     <TableCell className="group">{renderEditableDate(task.id, task.dueDate, 'dueDate')}</TableCell>
+                    <TableCell className="group">{renderEditableDuration(task.id, task.duration)}</TableCell>
                     <TableCell>{renderEditableStatus(task.id, task.status)}</TableCell>
                     <TableCell>{renderEditablePriority(task.id, task.priority)}</TableCell>
                     <TableCell>
@@ -527,6 +606,7 @@ export default function MyTasks() {
                         task.location
                       )}
                     </TableCell>
+                    <TableCell className="group">{renderEditableTime(task.id, task.timeSpent)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -557,29 +637,45 @@ export default function MyTasks() {
             
             <div className="space-y-3">
               {column.tasks.map((task) => (
-                <Card key={task.id} className="p-3 cursor-pointer" onClick={() => setSelectedTaskId(task.id)}>
+                <Card 
+                  key={task.id} 
+                  className="p-3 cursor-pointer hover:bg-muted/30 transition-colors" 
+                  onClick={() => setSelectedTaskId(task.id)}
+                >
                   <h4 className="font-medium text-sm mb-2">{task.name}</h4>
                   
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                  <div className="flex items-center justify-between mb-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      <span>{task.dueDate}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                      Inicio: {task.startDate}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Fin: {task.dueDate}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      <span>{task.timeSpent !== '-' ? task.timeSpent : 'No iniciado'}</span>
-                    </div>
+                      Duración: {task.duration}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {task.timeSpent !== '-' ? task.timeSpent : 'No iniciado'}
+                    </span>
                   </div>
                   
                   <div className="flex items-center justify-between mt-2 pt-2 border-t">
                     {renderPriorityBadge(task.priority)}
                     
-                    {task.projectLink && (
+                    {task.projectLink ? (
                       <Link to={task.projectLink} className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                        Ver proyecto
+                        {task.location?.includes('/') ? task.location.split('/')[1].trim() : task.location}
                         <LinkIcon className="h-3 w-3" />
                       </Link>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">{task.location}</span>
                     )}
                   </div>
                 </Card>
@@ -588,6 +684,7 @@ export default function MyTasks() {
               <Button 
                 variant="ghost" 
                 className="w-full justify-start text-muted-foreground py-6 border border-dashed"
+                onClick={() => setIsNewTaskDialogOpen(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Añadir una tarea
@@ -595,7 +692,134 @@ export default function MyTasks() {
             </div>
           </div>
         ))}
+        
+        <div className="flex-shrink-0 w-14 flex items-start justify-center pt-10">
+          <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
+            <PlusIcon className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
+    );
+  };
+
+  const renderNewTaskDialog = () => {
+    return (
+      <Dialog open={isNewTaskDialogOpen} onOpenChange={setIsNewTaskDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Agregar nueva tarea</DialogTitle>
+            <DialogDescription>
+              Completa los detalles para crear una nueva tarea
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="taskName" className="text-right">
+                Nombre
+              </Label>
+              <Input
+                id="taskName"
+                value={newTask.name}
+                onChange={(e) => handleNewTaskChange('name', e.target.value)}
+                className="col-span-3"
+                placeholder="Nombre de la tarea"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="startDate" className="text-right">
+                Fecha de inicio
+              </Label>
+              <Input
+                id="startDate"
+                value={newTask.startDate}
+                onChange={(e) => handleNewTaskChange('startDate', e.target.value)}
+                className="col-span-3"
+                placeholder="DD/MM/AAAA"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dueDate" className="text-right">
+                Fecha de vencimiento
+              </Label>
+              <Input
+                id="dueDate"
+                value={newTask.dueDate}
+                onChange={(e) => handleNewTaskChange('dueDate', e.target.value)}
+                className="col-span-3"
+                placeholder="DD/MM/AAAA"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="duration" className="text-right">
+                Duración
+              </Label>
+              <Input
+                id="duration"
+                value={newTask.duration}
+                onChange={(e) => handleNewTaskChange('duration', e.target.value)}
+                className="col-span-3"
+                placeholder="Ej: 3d, 1s"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="timeEstimate" className="text-right">
+                Tiempo estimado
+              </Label>
+              <Input
+                id="timeEstimate"
+                value={newTask.timeEstimate}
+                onChange={(e) => handleNewTaskChange('timeEstimate', e.target.value)}
+                className="col-span-3"
+                placeholder="Ej: 8h, 3d"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="priority" className="text-right">
+                Prioridad
+              </Label>
+              <Select 
+                value={newTask.priority}
+                onValueChange={(value) => handleNewTaskChange('priority', value)}
+              >
+                <SelectTrigger id="priority" className="col-span-3">
+                  <SelectValue placeholder="Seleccionar prioridad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Baja</SelectItem>
+                  <SelectItem value="medium">Media</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="project" className="text-right">
+                Proyecto
+              </Label>
+              <Select 
+                value={newTask.project}
+                onValueChange={(value) => handleNewTaskChange('project', value)}
+              >
+                <SelectTrigger id="project" className="col-span-3">
+                  <SelectValue placeholder="Seleccionar proyecto" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sin-proyecto">Sin proyecto</SelectItem>
+                  <SelectItem value="proyecto-1a">Proyecto 1A</SelectItem>
+                  <SelectItem value="proyecto-1b">Proyecto 1B</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button onClick={handleCreateTask}>Crear tarea</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     );
   };
 
@@ -618,7 +842,7 @@ export default function MyTasks() {
       </div>
       
       <div className="mb-4 flex items-center justify-between">
-        <Button className="gap-1">
+        <Button className="gap-1" onClick={() => setIsNewTaskDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Agregar tarea
         </Button>
@@ -655,9 +879,6 @@ export default function MyTasks() {
                   Prioridad
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  Fecha
-                </DropdownMenuItem>
-                <DropdownMenuItem>
                   Proyecto
                 </DropdownMenuItem>
               </DropdownMenuGroup>
@@ -676,12 +897,6 @@ export default function MyTasks() {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>
-                  Fecha (más reciente)
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  Fecha (más antigua)
-                </DropdownMenuItem>
-                <DropdownMenuItem>
                   Prioridad (alta a baja)
                 </DropdownMenuItem>
                 <DropdownMenuItem>
@@ -698,23 +913,23 @@ export default function MyTasks() {
 
       {viewMode === 'list' ? (
         <>
-          {/* Primera fila: Tareas Vencidas y Próximos Hitos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Primera fila: Tareas Pendientes y Próximos Eventos */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="col-span-2">
+              {renderTaskTable(taskGroups.pending, 'Tareas pendientes', false)}
+            </div>
+            <div className="col-span-1">
+              {renderEvents()}
+            </div>
+          </div>
+          
+          {/* Segunda fila: Tareas vencidas y próximas */}
+          <div className="grid grid-cols-1 gap-6 mb-6">
             <div className="col-span-1">
               {renderOverdueTasks()}
             </div>
             <div className="col-span-1">
-              {renderMilestones()}
-            </div>
-          </div>
-          
-          {/* Segunda fila: Tareas próximas y pendientes */}
-          <div className="grid grid-cols-1 gap-6 mb-6">
-            <div className="col-span-1">
               {renderTaskTable(taskGroups.upcoming, 'Tareas próximas a vencer')}
-            </div>
-            <div className="col-span-1">
-              {renderTaskTable(taskGroups.pending, 'Tareas pendientes')}
             </div>
           </div>
         </>
@@ -723,24 +938,30 @@ export default function MyTasks() {
         renderKanbanView()
       )}
 
+      {renderNewTaskDialog()}
+
       {selectedTaskId && selectedTask && (
-        <TaskDetails 
-          task={{
-            id: selectedTask.id,
-            name: selectedTask.name,
-            startDate: selectedTask.startDate,
-            endDate: selectedTask.dueDate,
-            duration: selectedTask.duration,
-            status: selectedTask.status,
-            priority: selectedTask.priority,
-            assignedTo: {
-              name: 'Usuario',
-              initials: 'US'
-            },
-            timeSpent: selectedTask.timeSpent,
-          }}
-          onClose={() => setSelectedTaskId(null)}
-        />
+        <div className="fixed inset-y-0 right-0 w-96 bg-background border-l shadow-lg z-40">
+          <TaskDetails 
+            task={{
+              id: selectedTask.id,
+              name: selectedTask.name,
+              startDate: selectedTask.startDate,
+              endDate: selectedTask.dueDate,
+              duration: selectedTask.duration,
+              status: selectedTask.status === 'no-iniciado' ? 'new' : 
+                     selectedTask.status === 'en-progreso' ? 'in-progress' : 
+                     selectedTask.status === 'completado' ? 'completed' : 'new',
+              priority: selectedTask.priority,
+              assignedTo: {
+                name: 'Usuario',
+                initials: 'US'
+              },
+              timeSpent: selectedTask.timeSpent,
+            }}
+            onClose={() => setSelectedTaskId(null)}
+          />
+        </div>
       )}
     </div>
   );
@@ -780,3 +1001,4 @@ const ChevronRight = ({ className }: { className?: string }) => (
     <path d="M9 18l6-6-6-6" />
   </svg>
 );
+
