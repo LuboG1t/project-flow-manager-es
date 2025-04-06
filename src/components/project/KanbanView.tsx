@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calendar, Plus, MoreHorizontal, UserPlus } from 'lucide-react';
+import { Clock, Calendar, Plus, MoreHorizontal, UserPlus, X } from 'lucide-react';
 import { TaskDetails } from './TaskDetails';
 
 interface Task {
@@ -48,9 +48,9 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
   const tasks: Task[] = [
     {
       id: 'task-1',
-      name: 'Definición de requisitos',
-      startDate: '01/04/2025',
-      endDate: '10/04/2025',
+      name: 'Definición de requisitos técnicos y funcionales del sistema',
+      startDate: '01 abr',
+      endDate: '10 abr',
       duration: '10d',
       status: 'completed',
       priority: 'high',
@@ -64,9 +64,9 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
     },
     {
       id: 'task-2',
-      name: 'Planificación de sprints',
-      startDate: '11/04/2025',
-      endDate: '15/04/2025',
+      name: 'Planificación de sprints y asignación de recursos',
+      startDate: '11 abr',
+      endDate: '15 abr',
       duration: '5d',
       status: 'in-progress',
       priority: 'medium',
@@ -80,9 +80,9 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
     },
     {
       id: 'task-3',
-      name: 'Desarrollo del backend',
-      startDate: '16/04/2025',
-      endDate: '30/04/2025',
+      name: 'Desarrollo del backend para la gestión de usuarios',
+      startDate: '16 abr',
+      endDate: '30 abr',
       duration: '15d',
       status: 'new',
       priority: 'high',
@@ -96,9 +96,9 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
     },
     {
       id: 'task-4',
-      name: 'Desarrollo del frontend',
-      startDate: '16/04/2025',
-      endDate: '30/04/2025',
+      name: 'Desarrollo del frontend para el panel de administración',
+      startDate: '16 abr',
+      endDate: '30 abr',
       duration: '15d',
       status: 'new',
       priority: 'high',
@@ -112,9 +112,9 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
     },
     {
       id: 'task-5',
-      name: 'Crear documento de arquitectura',
-      startDate: '05/04/2025',
-      endDate: '08/04/2025',
+      name: 'Crear documento de arquitectura y diseño técnico',
+      startDate: '05 abr',
+      endDate: '08 abr',
       duration: '4d',
       status: 'in-review',
       priority: 'medium',
@@ -177,7 +177,12 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
                   onClick={() => setSelectedTaskId(task.id)}
                 >
                   <CardContent className="p-3">
-                    <h4 className="font-medium text-sm mb-2">{task.name}</h4>
+                    <h4 className="font-medium text-sm mb-2 truncate relative pr-6">
+                      <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                        {task.name}
+                      </span>
+                    </h4>
+                    
                     {task.description && (
                       <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                         {task.description}
@@ -187,7 +192,19 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-muted-foreground text-xs">
                         <Calendar className="h-3 w-3" />
-                        <span>{task.endDate}</span>
+                        <span>Inicio: {task.startDate}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                        <Calendar className="h-3 w-3" />
+                        <span>Fin: {task.endDate}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                        <Clock className="h-3 w-3" />
+                        <span>Duración: {task.duration}</span>
                       </div>
                       
                       <div className="flex items-center gap-1 text-muted-foreground text-xs">
@@ -226,26 +243,39 @@ export default function KanbanView({ projectId }: KanbanViewProps) {
             </div>
           </div>
         ))}
+        
+        <div className="flex-shrink-0 w-14 flex items-start justify-center pt-10">
+          <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
+            <Plus className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
       
       {selectedTaskId && selectedTask && (
-        <TaskDetails 
-          task={{
-            id: selectedTask.id,
-            name: selectedTask.name,
-            startDate: selectedTask.startDate,
-            endDate: selectedTask.endDate,
-            duration: selectedTask.duration,
-            status: selectedTask.status,
-            priority: selectedTask.priority,
-            assignedTo: selectedTask.assignedTo || {
-              name: 'Sin asignar',
-              initials: 'SA'
-            },
-            timeSpent: selectedTask.timeSpent,
-          }}
-          onClose={() => setSelectedTaskId(null)}
-        />
+        <div className="fixed inset-y-0 right-0 w-[400px] bg-background border-l shadow-lg z-40">
+          <div className="absolute top-2 right-2 z-10">
+            <Button variant="ghost" size="icon" onClick={() => setSelectedTaskId(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <TaskDetails 
+            task={{
+              id: selectedTask.id,
+              name: selectedTask.name,
+              startDate: selectedTask.startDate,
+              endDate: selectedTask.endDate,
+              duration: selectedTask.duration,
+              status: selectedTask.status,
+              priority: selectedTask.priority,
+              assignedTo: selectedTask.assignedTo || {
+                name: 'Sin asignar',
+                initials: 'SA'
+              },
+              timeSpent: selectedTask.timeSpent,
+            }}
+            onClose={() => setSelectedTaskId(null)}
+          />
+        </div>
       )}
     </div>
   );

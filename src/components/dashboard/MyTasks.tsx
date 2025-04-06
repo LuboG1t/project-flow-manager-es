@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, Filter, SortDesc, Plus, Clock, AlertTriangle, Link as LinkIcon, ChevronDown, Plus as PlusIcon } from 'lucide-react';
+import { Calendar, Filter, SortDesc, Plus, Clock, AlertTriangle, Link as LinkIcon, ChevronDown, Plus as PlusIcon, X } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -38,6 +38,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface Task {
   id: string;
@@ -80,7 +82,7 @@ const priorityColors = {
 };
 
 export default function MyTasks() {
-  const [currentDate, setCurrentDate] = useState('24 abr 2025');
+  const [currentDate, setCurrentDate] = useState('24 abr');
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [editingCell, setEditingCell] = useState<{id: string, field: string} | null>(null);
   const [editValue, setEditValue] = useState<string>('');
@@ -101,9 +103,9 @@ export default function MyTasks() {
     overdue: [
       {
         id: 'task-10',
-        name: 'Actualizar documentación técnica',
-        startDate: '20 abr 2025',
-        dueDate: '22 abr 2025',
+        name: 'Actualizar documentación técnica del sistema de gestión de tareas y recursos',
+        startDate: '20 abr',
+        dueDate: '22 abr',
         duration: '3d',
         status: 'en-progreso',
         priority: 'high',
@@ -113,9 +115,9 @@ export default function MyTasks() {
       },
       {
         id: 'task-11',
-        name: 'Corregir errores de interfaz',
-        startDate: '18 abr 2025',
-        dueDate: '21 abr 2025',
+        name: 'Corregir errores de interfaz en el panel de administración',
+        startDate: '18 abr',
+        dueDate: '21 abr',
         duration: '4d',
         status: 'en-progreso',
         priority: 'medium',
@@ -124,9 +126,9 @@ export default function MyTasks() {
       },
       {
         id: 'task-12',
-        name: 'Preparar reporte semanal',
-        startDate: '24 abr 2025',
-        dueDate: '24 abr 2025',
+        name: 'Preparar reporte semanal de avance para el equipo directivo',
+        startDate: '24 abr',
+        dueDate: '24 abr',
         duration: '1d',
         status: 'completado',
         priority: 'high',
@@ -134,27 +136,74 @@ export default function MyTasks() {
         projectLink: '/projects/1a',
         timeSpent: '8h/8h'
       },
+      {
+        id: 'task-13',
+        name: 'Revisión de prototipo de funcionalidad de calendario',
+        startDate: '17 abr',
+        dueDate: '20 abr',
+        duration: '4d',
+        status: 'en-progreso',
+        priority: 'high',
+        location: 'Portafolio 1 / Proyecto 1B',
+        projectLink: '/projects/1b',
+        timeSpent: '12h/16h'
+      },
     ],
     upcoming: [
       {
         id: 'task-4',
-        name: 'Desarrollar funcionalidad de búsqueda',
-        startDate: '24 abr 2025',
-        dueDate: '28 abr 2025',
+        name: 'Desarrollar funcionalidad de búsqueda avanzada para repositorio de documentos',
+        startDate: '24 abr',
+        dueDate: '28 abr',
         duration: '5d',
         status: 'no-iniciado',
         priority: 'low',
         location: 'Portafolio 1 / Proyecto 1A',
         projectLink: '/projects/1a',
         timeSpent: '-'
-      }
+      },
+      {
+        id: 'task-14',
+        name: 'Implementar sistema de notificaciones por correo electrónico',
+        startDate: '25 abr',
+        dueDate: '29 abr',
+        duration: '5d',
+        status: 'no-iniciado',
+        priority: 'medium',
+        location: 'Portafolio 1 / Proyecto 1B',
+        projectLink: '/projects/1b',
+        timeSpent: '-'
+      },
+      {
+        id: 'task-15',
+        name: 'Crear manual de usuario para módulo de reportes',
+        startDate: '26 abr',
+        dueDate: '30 abr',
+        duration: '5d',
+        status: 'no-iniciado',
+        priority: 'low',
+        location: 'Sin proyecto',
+        timeSpent: '-'
+      },
+      {
+        id: 'task-16',
+        name: 'Optimizar consultas de base de datos para mejorar rendimiento',
+        startDate: '25 abr',
+        dueDate: '27 abr',
+        duration: '3d',
+        status: 'no-iniciado',
+        priority: 'high',
+        location: 'Portafolio 1 / Proyecto 1A',
+        projectLink: '/projects/1a',
+        timeSpent: '-'
+      },
     ],
     pending: [
       {
         id: 'task-1',
-        name: 'Diseñar componentes de UI',
-        startDate: '24 abr 2025',
-        dueDate: '24 abr 2025',
+        name: 'Diseñar componentes de UI para la nueva versión del dashboard',
+        startDate: '24 abr',
+        dueDate: '24 abr',
         duration: '1d',
         status: 'no-iniciado',
         priority: 'high',
@@ -164,9 +213,9 @@ export default function MyTasks() {
       },
       {
         id: 'task-2',
-        name: 'Revisión de código',
-        startDate: '24 abr 2025',
-        dueDate: '24 abr 2025',
+        name: 'Revisión de código del módulo de autenticación y seguridad',
+        startDate: '24 abr',
+        dueDate: '24 abr',
         duration: '1d',
         status: 'no-iniciado',
         priority: 'high',
@@ -175,9 +224,9 @@ export default function MyTasks() {
       },
       {
         id: 'task-3',
-        name: 'Configuración de entorno de pruebas',
-        startDate: '24 abr 2025',
-        dueDate: '24 abr 2025',
+        name: 'Configuración de entorno de pruebas automatizadas',
+        startDate: '24 abr',
+        dueDate: '24 abr',
         duration: '1d',
         status: 'no-iniciado',
         priority: 'medium',
@@ -187,9 +236,9 @@ export default function MyTasks() {
       },
       {
         id: 'task-5',
-        name: 'Planificación sprint siguiente',
-        startDate: '24 abr 2025',
-        dueDate: '24 abr 2025',
+        name: 'Planificación sprint siguiente y distribución de tareas',
+        startDate: '24 abr',
+        dueDate: '24 abr',
         duration: '1d',
         status: 'no-iniciado',
         priority: 'high',
@@ -199,9 +248,9 @@ export default function MyTasks() {
       },
       {
         id: 'task-6',
-        name: 'Análisis de requisitos',
-        startDate: '24 abr 2025',
-        dueDate: '24 abr 2025',
+        name: 'Análisis de requisitos para nueva funcionalidad de exportación',
+        startDate: '24 abr',
+        dueDate: '24 abr',
         duration: '1d',
         status: 'no-iniciado',
         priority: 'high',
@@ -217,7 +266,7 @@ export default function MyTasks() {
     {
       id: 'event-1',
       name: 'Reunión de Inicio de Proyecto',
-      date: '25 abr 2025',
+      date: '25 abr',
       time: '10:00 - 11:30',
       project: 'Proyecto 1A',
       projectLink: '/projects/1a'
@@ -225,14 +274,14 @@ export default function MyTasks() {
     {
       id: 'event-2',
       name: 'Entrega de Diseños',
-      date: '27 abr 2025',
+      date: '27 abr',
       project: 'Proyecto 1B',
       projectLink: '/projects/1b'
     },
     {
       id: 'event-3',
       name: 'Revisión de Avances',
-      date: '29 abr 2025',
+      date: '29 abr',
       time: '15:00 - 16:00',
       project: 'Proyecto 1A',
       projectLink: '/projects/1a'
@@ -240,7 +289,7 @@ export default function MyTasks() {
     {
       id: 'event-4',
       name: 'Reunión con Cliente',
-      date: '2 may 2025',
+      date: '2 may',
       time: '09:00 - 10:30',
       project: 'Proyecto 1B',
       projectLink: '/projects/1b'
@@ -291,7 +340,7 @@ export default function MyTasks() {
 
   const renderStatusBadge = (status: Task['status']) => {
     return (
-      <span className={`task-status-pill status-${status}`}>
+      <span className={`task-status-pill status-${status} whitespace-nowrap`}>
         {statusLabels[status]}
       </span>
     );
@@ -448,65 +497,70 @@ export default function MyTasks() {
     );
   };
 
-  const renderTaskTable = (tasks: Task[], title: string, showAllColumns = true) => {
+  const renderTaskTable = (tasks: Task[], title: string, showAllColumns = true, maxHeight?: string) => {
     return (
       <Card className="w-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-medium">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[250px]">Nombre</TableHead>
-                <TableHead>Fecha de inicio</TableHead>
-                <TableHead>Fecha de vencimiento</TableHead>
-                <TableHead>Duración</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Prioridad</TableHead>
-                <TableHead>Ubicación</TableHead>
-                {showAllColumns && <TableHead>Tiempo empleado</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tasks.map((task) => (
-                <TableRow 
-                  key={task.id} 
-                  className="hover:bg-muted/40 cursor-pointer" 
-                  onClick={() => setSelectedTaskId(task.id)}
-                >
-                  <TableCell className="font-medium">
-                    {task.name.startsWith('Sub') ? (
-                      <span className="inline-block ml-6">{task.name}</span>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        <span>{task.name}</span>
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="group">{renderEditableDate(task.id, task.startDate, 'startDate')}</TableCell>
-                  <TableCell className="group">{renderEditableDate(task.id, task.dueDate, 'dueDate')}</TableCell>
-                  <TableCell className="group">{renderEditableDuration(task.id, task.duration)}</TableCell>
-                  <TableCell>{renderEditableStatus(task.id, task.status)}</TableCell>
-                  <TableCell>{renderEditablePriority(task.id, task.priority)}</TableCell>
-                  <TableCell>
-                    {task.projectLink ? (
-                      <Link to={task.projectLink} className="flex items-center gap-1.5 text-blue-600 hover:underline">
-                        {task.location}
-                        <LinkIcon className="h-3.5 w-3.5" />
-                      </Link>
-                    ) : (
-                      task.location
-                    )}
-                  </TableCell>
-                  {showAllColumns && (
-                    <TableCell className="group">{renderEditableTime(task.id, task.timeSpent)}</TableCell>
-                  )}
+          <ScrollArea className={maxHeight}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[250px]">Nombre</TableHead>
+                  <TableHead>Inicio</TableHead>
+                  <TableHead>Fin</TableHead>
+                  <TableHead>Duración</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Prioridad</TableHead>
+                  <TableHead>Ubicación</TableHead>
+                  {showAllColumns && <TableHead>Tiempo empleado</TableHead>}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {tasks.map((task) => (
+                  <TableRow 
+                    key={task.id} 
+                    className="hover:bg-muted/40 cursor-pointer" 
+                    onClick={() => setSelectedTaskId(task.id)}
+                  >
+                    <TableCell className="font-medium">
+                      <div className="truncate relative pr-6 max-w-[240px]">
+                        <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                          {task.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="group">{renderEditableDate(task.id, task.startDate, 'startDate')}</TableCell>
+                    <TableCell className="group">{renderEditableDate(task.id, task.dueDate, 'dueDate')}</TableCell>
+                    <TableCell className="group">{renderEditableDuration(task.id, task.duration)}</TableCell>
+                    <TableCell>{renderEditableStatus(task.id, task.status)}</TableCell>
+                    <TableCell>{renderEditablePriority(task.id, task.priority)}</TableCell>
+                    <TableCell>
+                      {task.projectLink ? (
+                        <div className="truncate relative pr-6 max-w-[150px]">
+                          <Link to={task.projectLink} className="flex items-center gap-1.5 text-blue-600 hover:underline after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                            {task.location}
+                            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="truncate relative pr-6 max-w-[150px]">
+                          <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                            {task.location}
+                          </span>
+                        </div>
+                      )}
+                    </TableCell>
+                    {showAllColumns && (
+                      <TableCell className="group">{renderEditableTime(task.id, task.timeSpent)}</TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </CardContent>
       </Card>
     );
@@ -522,42 +576,44 @@ export default function MyTasks() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="divide-y">
-            {upcomingEvents.map((event) => (
-              <div key={event.id} className="p-4 flex items-start gap-3 hover:bg-muted/50">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{event.name}</p>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {event.date}
-                    </span>
-                    {event.time && (
+          <ScrollArea className="h-[200px]">
+            <div className="divide-y">
+              {upcomingEvents.map((event) => (
+                <div key={event.id} className="p-4 flex items-start gap-3 hover:bg-muted/50">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{event.name}</p>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                       <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {event.time}
+                        <Calendar className="h-4 w-4" />
+                        {event.date}
                       </span>
+                      {event.time && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {event.time}
+                        </span>
+                      )}
+                    </div>
+                    {event.project && (
+                      <p className="text-xs text-blue-600 hover:underline mt-1">
+                        {event.projectLink ? (
+                          <Link to={event.projectLink} className="flex items-center gap-1">
+                            {event.project}
+                            <LinkIcon className="h-3 w-3" />
+                          </Link>
+                        ) : (
+                          event.project
+                        )}
+                      </p>
                     )}
                   </div>
-                  {event.project && (
-                    <p className="text-xs text-blue-600 hover:underline mt-1">
-                      {event.projectLink ? (
-                        <Link to={event.projectLink} className="flex items-center gap-1">
-                          {event.project}
-                          <LinkIcon className="h-3 w-3" />
-                        </Link>
-                      ) : (
-                        event.project
-                      )}
-                    </p>
-                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
     );
@@ -578,8 +634,8 @@ export default function MyTasks() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
-                  <TableHead>Fecha inicio</TableHead>
-                  <TableHead>Fecha vencimiento</TableHead>
+                  <TableHead>Inicio</TableHead>
+                  <TableHead>Fin</TableHead>
                   <TableHead>Duración</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Prioridad</TableHead>
@@ -590,7 +646,13 @@ export default function MyTasks() {
               <TableBody>
                 {taskGroups.overdue.map((task) => (
                   <TableRow key={task.id} className="cursor-pointer" onClick={() => setSelectedTaskId(task.id)}>
-                    <TableCell>{task.name}</TableCell>
+                    <TableCell>
+                      <div className="truncate relative pr-6 max-w-[150px]">
+                        <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                          {task.name}
+                        </span>
+                      </div>
+                    </TableCell>
                     <TableCell className="group">{renderEditableDate(task.id, task.startDate, 'startDate')}</TableCell>
                     <TableCell className="group">{renderEditableDate(task.id, task.dueDate, 'dueDate')}</TableCell>
                     <TableCell className="group">{renderEditableDuration(task.id, task.duration)}</TableCell>
@@ -598,12 +660,18 @@ export default function MyTasks() {
                     <TableCell>{renderEditablePriority(task.id, task.priority)}</TableCell>
                     <TableCell>
                       {task.projectLink ? (
-                        <Link to={task.projectLink} className="flex items-center gap-1.5 text-blue-600 hover:underline">
-                          {task.location}
-                          <LinkIcon className="h-3.5 w-3.5" />
-                        </Link>
+                        <div className="truncate relative pr-6 max-w-[150px]">
+                          <Link to={task.projectLink} className="flex items-center gap-1.5 text-blue-600 hover:underline after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                            {task.location}
+                            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                          </Link>
+                        </div>
                       ) : (
-                        task.location
+                        <div className="truncate relative pr-6 max-w-[150px]">
+                          <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                            {task.location}
+                          </span>
+                        </div>
                       )}
                     </TableCell>
                     <TableCell className="group">{renderEditableTime(task.id, task.timeSpent)}</TableCell>
@@ -642,7 +710,11 @@ export default function MyTasks() {
                   className="p-3 cursor-pointer hover:bg-muted/30 transition-colors" 
                   onClick={() => setSelectedTaskId(task.id)}
                 >
-                  <h4 className="font-medium text-sm mb-2">{task.name}</h4>
+                  <h4 className="font-medium text-sm mb-2 truncate relative pr-6">
+                    <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                      {task.name}
+                    </span>
+                  </h4>
                   
                   <div className="flex items-center justify-between mb-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
@@ -670,12 +742,14 @@ export default function MyTasks() {
                     {renderPriorityBadge(task.priority)}
                     
                     {task.projectLink ? (
-                      <Link to={task.projectLink} className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                        {task.location?.includes('/') ? task.location.split('/')[1].trim() : task.location}
-                        <LinkIcon className="h-3 w-3" />
-                      </Link>
+                      <div className="truncate max-w-[100px]">
+                        <Link to={task.projectLink} className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                          {task.location?.includes('/') ? task.location.split('/')[1].trim() : task.location}
+                          <LinkIcon className="h-3 w-3 shrink-0" />
+                        </Link>
+                      </div>
                     ) : (
-                      <span className="text-xs text-muted-foreground">{task.location}</span>
+                      <span className="text-xs text-muted-foreground truncate max-w-[100px]">{task.location}</span>
                     )}
                   </div>
                 </Card>
@@ -914,9 +988,9 @@ export default function MyTasks() {
       {viewMode === 'list' ? (
         <>
           {/* Primera fila: Tareas Pendientes y Próximos Eventos */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div className="col-span-2">
-              {renderTaskTable(taskGroups.pending, 'Tareas pendientes', false)}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="col-span-3">
+              {renderTaskTable(taskGroups.pending, 'Tareas pendientes', false, "h-[200px]")}
             </div>
             <div className="col-span-1">
               {renderEvents()}
@@ -929,7 +1003,7 @@ export default function MyTasks() {
               {renderOverdueTasks()}
             </div>
             <div className="col-span-1">
-              {renderTaskTable(taskGroups.upcoming, 'Tareas próximas a vencer')}
+              {renderTaskTable(taskGroups.upcoming, 'Tareas próximas a vencer', true, "h-[200px]")}
             </div>
           </div>
         </>
@@ -941,7 +1015,12 @@ export default function MyTasks() {
       {renderNewTaskDialog()}
 
       {selectedTaskId && selectedTask && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-background border-l shadow-lg z-40">
+        <div className="fixed inset-y-0 right-0 w-[400px] bg-background border-l shadow-lg z-40">
+          <div className="absolute top-2 right-2 z-10">
+            <Button variant="ghost" size="icon" onClick={() => setSelectedTaskId(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
           <TaskDetails 
             task={{
               id: selectedTask.id,

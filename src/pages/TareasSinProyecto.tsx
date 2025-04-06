@@ -14,13 +14,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from '@/components/ui/select';
 import { TaskDetails } from '../components/project/TaskDetails';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Task {
   id: string;
@@ -59,9 +60,9 @@ export default function TareasSinProyecto() {
   const tasks: Task[] = [
     {
       id: 'task-1',
-      name: 'Investigar nuevas tecnologías de frontend',
-      startDate: '04/04/2025',
-      dueDate: '10/04/2025',
+      name: 'Investigar nuevas tecnologías de frontend para optimizar desarrollo',
+      startDate: '04 abr',
+      dueDate: '10 abr',
       duration: '6d',
       status: 'in-progress',
       priority: 'medium',
@@ -74,9 +75,9 @@ export default function TareasSinProyecto() {
     },
     {
       id: 'task-2',
-      name: 'Preparar presentación para cliente potencial',
-      startDate: '02/04/2025',
-      dueDate: '05/04/2025',
+      name: 'Preparar presentación para cliente potencial sobre sistema de gestión',
+      startDate: '02 abr',
+      dueDate: '05 abr',
       duration: '3d',
       status: 'in-review',
       priority: 'high',
@@ -89,9 +90,9 @@ export default function TareasSinProyecto() {
     },
     {
       id: 'task-3',
-      name: 'Actualizar documentación interna',
-      startDate: '03/04/2025',
-      dueDate: '08/04/2025',
+      name: 'Actualizar documentación interna de procesos y mejores prácticas',
+      startDate: '03 abr',
+      dueDate: '08 abr',
       duration: '5d',
       status: 'new',
       priority: 'low',
@@ -99,9 +100,9 @@ export default function TareasSinProyecto() {
     },
     {
       id: 'task-4',
-      name: 'Revisar tickets de soporte pendientes',
-      startDate: '01/04/2025',
-      dueDate: '03/04/2025',
+      name: 'Revisar tickets de soporte pendientes de la plataforma principal',
+      startDate: '01 abr',
+      dueDate: '03 abr',
       duration: '2d',
       status: 'completed',
       priority: 'medium',
@@ -113,9 +114,9 @@ export default function TareasSinProyecto() {
     },
     {
       id: 'task-5',
-      name: 'Planificar actividad de equipo',
-      startDate: '10/04/2025',
-      dueDate: '15/04/2025',
+      name: 'Planificar actividad de integración de equipo para fin de mes',
+      startDate: '10 abr',
+      dueDate: '15 abr',
       duration: '5d',
       status: 'new',
       priority: 'low',
@@ -129,7 +130,7 @@ export default function TareasSinProyecto() {
 
   const getStatusBadge = (status: Task['status']) => {
     return (
-      <span className={`task-status-pill status-${status}`}>
+      <span className={`task-status-pill status-${status} whitespace-nowrap`}>
         {statusLabels[status]}
       </span>
     );
@@ -229,10 +230,12 @@ export default function TareasSinProyecto() {
             />
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setIsAddTaskOpen(false)}>Cancelar</Button>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancelar</Button>
+          </DialogClose>
           <Button>Guardar tarea</Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -302,60 +305,66 @@ export default function TareasSinProyecto() {
           <div className="flex-1 overflow-hidden">
             {activeView === 'list' ? (
               <div className="border rounded-md shadow-sm overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[300px]">Nombre</TableHead>
-                      <TableHead>Fecha de inicio</TableHead>
-                      <TableHead>Fecha de vencimiento</TableHead>
-                      <TableHead>Duración</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Prioridad</TableHead>
-                      <TableHead>Asignado</TableHead>
-                      <TableHead>Tiempo empleado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tasks.map((task) => (
-                      <TableRow 
-                        key={task.id}
-                        className={`hover:bg-muted/40 ${selectedTaskId === task.id ? 'bg-muted/60' : ''}`}
-                      >
-                        <TableCell className="font-medium">
-                          <button
-                            onClick={() => setSelectedTaskId(task.id)}
-                            className="hover:underline text-left"
-                          >
-                            {task.name}
-                          </button>
-                        </TableCell>
-                        <TableCell>{task.startDate}</TableCell>
-                        <TableCell>{task.dueDate}</TableCell>
-                        <TableCell>{task.duration}</TableCell>
-                        <TableCell>{getStatusBadge(task.status)}</TableCell>
-                        <TableCell>{getPriorityBadge(task.priority)}</TableCell>
-                        <TableCell>
-                          {task.assignedTo ? (
-                            <Avatar className="h-7 w-7 bg-primary">
-                              <span className="text-xs">{task.assignedTo.initials}</span>
-                            </Avatar>
-                          ) : (
-                            <Button variant="ghost" size="icon" className="h-7 w-7">
-                              <UserPlus className="h-4 w-4 text-muted-foreground" />
-                            </Button>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <span className={task.timeSpent === '-' ? 'text-muted-foreground' : 
-                            task.timeSpent.split('/')[0] === task.timeSpent.split('/')[1] ? 'text-green-600' : 'text-red-600'
-                          }>
-                            {task.timeSpent}
-                          </span>
-                        </TableCell>
+                <ScrollArea className="h-[600px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[300px]">Nombre</TableHead>
+                        <TableHead>Inicio</TableHead>
+                        <TableHead>Fin</TableHead>
+                        <TableHead>Duración</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Prioridad</TableHead>
+                        <TableHead>Asignado</TableHead>
+                        <TableHead>Tiempo empleado</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {tasks.map((task) => (
+                        <TableRow 
+                          key={task.id}
+                          className={`hover:bg-muted/40 ${selectedTaskId === task.id ? 'bg-muted/60' : ''}`}
+                        >
+                          <TableCell className="font-medium">
+                            <button
+                              onClick={() => setSelectedTaskId(task.id)}
+                              className="hover:underline text-left"
+                            >
+                              <div className="truncate relative pr-6 max-w-[290px]">
+                                <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                                  {task.name}
+                                </span>
+                              </div>
+                            </button>
+                          </TableCell>
+                          <TableCell>{task.startDate}</TableCell>
+                          <TableCell>{task.dueDate}</TableCell>
+                          <TableCell>{task.duration}</TableCell>
+                          <TableCell>{getStatusBadge(task.status)}</TableCell>
+                          <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+                          <TableCell>
+                            {task.assignedTo ? (
+                              <Avatar className="h-7 w-7 bg-primary">
+                                <span className="text-xs">{task.assignedTo.initials}</span>
+                              </Avatar>
+                            ) : (
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <UserPlus className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className={task.timeSpent === '-' ? 'text-muted-foreground' : 
+                              task.timeSpent.split('/')[0] === task.timeSpent.split('/')[1] ? 'text-green-600' : 'text-red-600'
+                            }>
+                              {task.timeSpent}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </div>
             ) : (
               <div className="flex gap-4">
@@ -386,7 +395,12 @@ export default function TareasSinProyecto() {
                           className="bg-card rounded-md p-3 border shadow-sm hover:shadow transition-shadow cursor-pointer"
                           onClick={() => setSelectedTaskId(task.id)}
                         >
-                          <h4 className="font-medium text-sm mb-2">{task.name}</h4>
+                          <h4 className="font-medium text-sm mb-2 truncate relative pr-6">
+                            <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                              {task.name}
+                            </span>
+                          </h4>
+                          
                           {task.description && (
                             <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                               {task.description}
@@ -396,7 +410,19 @@ export default function TareasSinProyecto() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1 text-muted-foreground text-xs">
                               <Calendar className="h-3 w-3" />
-                              <span>{task.dueDate}</span>
+                              <span>Inicio: {task.startDate}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                              <Calendar className="h-3 w-3" />
+                              <span>Fin: {task.dueDate}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between mt-1">
+                            <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                              <Clock className="h-3 w-3" />
+                              <span>Duración: {task.duration}</span>
                             </div>
                             
                             <div className="flex items-center gap-1 text-muted-foreground text-xs">
@@ -435,28 +461,41 @@ export default function TareasSinProyecto() {
                     </div>
                   </div>
                 ))}
+                
+                <div className="flex-shrink-0 w-14 flex items-start justify-center pt-10">
+                  <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
+                    <Plus className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
           
           {selectedTaskId && selectedTask && (
-            <TaskDetails 
-              task={{
-                id: selectedTask.id,
-                name: selectedTask.name,
-                startDate: selectedTask.startDate,
-                endDate: selectedTask.dueDate,
-                duration: selectedTask.duration,
-                status: selectedTask.status,
-                priority: selectedTask.priority,
-                assignedTo: selectedTask.assignedTo || {
-                  name: 'Sin asignar',
-                  initials: 'SA'
-                },
-                timeSpent: selectedTask.timeSpent,
-              }}
-              onClose={() => setSelectedTaskId(null)}
-            />
+            <div className="fixed inset-y-0 right-0 w-[400px] bg-background border-l shadow-lg z-40">
+              <div className="absolute top-2 right-2 z-10">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedTaskId(null)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <TaskDetails 
+                task={{
+                  id: selectedTask.id,
+                  name: selectedTask.name,
+                  startDate: selectedTask.startDate,
+                  endDate: selectedTask.dueDate,
+                  duration: selectedTask.duration,
+                  status: selectedTask.status,
+                  priority: selectedTask.priority,
+                  assignedTo: selectedTask.assignedTo || {
+                    name: 'Sin asignar',
+                    initials: 'SA'
+                  },
+                  timeSpent: selectedTask.timeSpent,
+                }}
+                onClose={() => setSelectedTaskId(null)}
+              />
+            </div>
           )}
         </div>
       </div>
