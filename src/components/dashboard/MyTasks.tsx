@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -498,7 +497,6 @@ export default function MyTasks() {
     </div>
   );
   
-  // Kanban view data structure
   const tasksByStatus = {
     'no-iniciado': [...pendingTasks],
     'en-progreso': [...inProgressTasks],
@@ -693,7 +691,7 @@ export default function MyTasks() {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="mr-2 h-4 w-4" />
                 Agregar
                 <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
@@ -770,161 +768,163 @@ export default function MyTasks() {
         </DropdownMenu>
       </div>
       
-      <TabsContent value="list" className="mt-0 space-y-6">
-        <div className="grid grid-cols-4 gap-6">
-          <div className="col-span-3">
+      <Tabs value={activeView} className="mt-0 space-y-6">
+        <TabsContent value="list" className="mt-0 space-y-6">
+          <div className="grid grid-cols-4 gap-6">
+            <div className="col-span-3">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Tareas pendientes</CardTitle>
+                </CardHeader>
+                <CardContent className="px-0">
+                  {renderPendingTaskTable()}
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="col-span-1">
+              <Card className="h-full">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Próximos eventos</CardTitle>
+                </CardHeader>
+                <CardContent className="px-0">
+                  {renderUpcomingEventsTable()}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-6">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Tareas pendientes</CardTitle>
+                <CardTitle className="text-lg">Tareas vencidas</CardTitle>
               </CardHeader>
-              <CardContent>
-                {renderPendingTaskTable()}
+              <CardContent className="px-0">
+                {renderOverdueTaskTable()}
               </CardContent>
             </Card>
-          </div>
-          
-          <div className="col-span-1">
-            <Card className="h-full">
+            
+            <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Próximos eventos</CardTitle>
+                <CardTitle className="text-lg">Tareas por vencer</CardTitle>
               </CardHeader>
-              <CardContent>
-                {renderUpcomingEventsTable()}
+              <CardContent className="px-0">
+                {renderSoonToExpireTaskTable()}
               </CardContent>
             </Card>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Tareas vencidas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderOverdueTaskTable()}
-            </CardContent>
-          </Card>
           
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Tareas por vencer</CardTitle>
+              <CardTitle className="text-lg">Tareas en progreso</CardTitle>
             </CardHeader>
-            <CardContent>
-              {renderSoonToExpireTaskTable()}
+            <CardContent className="px-0">
+              {renderInProgressTaskTable()}
             </CardContent>
           </Card>
-        </div>
+        </TabsContent>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Tareas en progreso</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {renderInProgressTaskTable()}
-          </CardContent>
-        </Card>
-      </TabsContent>
-      
-      <TabsContent value="kanban" className="mt-0">
-        <div className="flex gap-6 overflow-x-auto pb-4">
-          {kanbanColumns.map((column) => (
-            <div key={column.id} className="flex-shrink-0 w-[350px]">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${column.id === 'no-iniciado' ? 'bg-slate-400' : column.id === 'en-progreso' ? 'bg-blue-400' : 'bg-green-400'}`}></div>
-                  <h3 className="font-medium">{column.title}</h3>
-                  <span className="bg-muted rounded-full px-2 text-xs text-muted-foreground">
-                    {column.tasks.length}
-                  </span>
+        <TabsContent value="kanban" className="mt-0">
+          <div className="flex gap-6 overflow-x-auto pb-4">
+            {kanbanColumns.map((column) => (
+              <div key={column.id} className="flex-shrink-0 w-[350px]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${column.id === 'no-iniciado' ? 'bg-slate-400' : column.id === 'en-progreso' ? 'bg-blue-400' : 'bg-green-400'}`}></div>
+                    <h3 className="font-medium">{column.title}</h3>
+                    <span className="bg-muted rounded-full px-2 text-xs text-muted-foreground">
+                      {column.tasks.length}
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                {column.tasks.map((task) => (
-                  <Card 
-                    key={task.id} 
-                    className="cursor-pointer hover:shadow transition-shadow"
-                    onClick={() => setSelectedTaskId(task.id)}
-                  >
-                    <CardContent className="p-3">
-                      <h4 className="font-medium text-sm mb-2 truncate relative pr-6">
-                        <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
-                          {task.name}
-                        </span>
-                      </h4>
-                      
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                          <Calendar className="h-3 w-3" />
-                          <span>Inicio: {task.startDate}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                          <Calendar className="h-3 w-3" />
-                          <span>Fin: {task.dueDate}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                          <Clock className="h-3 w-3" />
-                          <span>Duración: {task.duration}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                          <Clock className="h-3 w-3" />
-                          <span>{task.timeSpent !== '-' ? task.timeSpent : 'No iniciado'}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mt-2 pt-2 border-t">
-                        <Badge variant="outline" className={`${priorityColors[task.priority]} text-[10px] px-1.5`}>
-                          {task.priority === 'alta' ? 'Alta' : task.priority === 'media' ? 'Media' : 'Baja'}
-                        </Badge>
-                        
-                        <div className="truncate max-w-[200px] text-xs text-blue-600">
-                          <a 
-                            href={task.project?.path || "/tareas-sin-proyecto"} 
-                            className="hover:underline truncate relative pr-6 inline-block"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
-                              {task.project ? task.project.name : "Sin proyecto"}
-                            </span>
-                          </a>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
                 
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-muted-foreground py-6 border border-dashed"
-                  onClick={() => setIsAddTaskOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Añadir una tarea
-                </Button>
+                <div className="space-y-3">
+                  {column.tasks.map((task) => (
+                    <Card 
+                      key={task.id} 
+                      className="cursor-pointer hover:shadow transition-shadow"
+                      onClick={() => setSelectedTaskId(task.id)}
+                    >
+                      <CardContent className="p-3">
+                        <h4 className="font-medium text-sm mb-2 truncate relative pr-6">
+                          <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
+                            {task.name}
+                          </span>
+                        </h4>
+                        
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                            <Calendar className="h-3 w-3" />
+                            <span>Inicio: {task.startDate}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                            <Calendar className="h-3 w-3" />
+                            <span>Fin: {task.dueDate}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                            <Clock className="h-3 w-3" />
+                            <span>Duración: {task.duration}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                            <Clock className="h-3 w-3" />
+                            <span>{task.timeSpent !== '-' ? task.timeSpent : 'No iniciado'}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t">
+                          <Badge variant="outline" className={`${priorityColors[task.priority]} text-[10px] px-1.5`}>
+                            {task.priority === 'alta' ? 'Alta' : task.priority === 'media' ? 'Media' : 'Baja'}
+                          </Badge>
+                          
+                          <div className="truncate max-w-[200px] text-xs text-blue-600">
+                            <a 
+                              href={task.project?.path || "/tareas-sin-proyecto"} 
+                              className="hover:underline truncate relative pr-6 inline-block"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-blue-50">
+                                {task.project ? task.project.name : "Sin proyecto"}
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-muted-foreground py-6 border border-dashed"
+                    onClick={() => setIsAddTaskOpen(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Añadir una tarea
+                  </Button>
+                </div>
               </div>
+            ))}
+            
+            <div className="flex-shrink-0 w-14 flex items-start justify-center pt-10">
+              <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
+                <Plus className="h-5 w-5" />
+              </Button>
             </div>
-          ))}
-          
-          <div className="flex-shrink-0 w-14 flex items-start justify-center pt-10">
-            <Button variant="outline" size="icon" className="rounded-full h-10 w-10">
-              <Plus className="h-5 w-5" />
-            </Button>
           </div>
-        </div>
-      </TabsContent>
+        </TabsContent>
+      </Tabs>
       
       {selectedTaskId && selectedTask && (
         <div className="fixed inset-y-0 right-0 w-[50%] bg-background border-l shadow-lg z-40 overflow-y-auto">
