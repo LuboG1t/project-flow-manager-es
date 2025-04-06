@@ -90,7 +90,7 @@ export default function Project1A() {
       <ProjectHeader 
         project={project} 
         activeView={activeView}
-        onChangeView={(view) => setActiveView(view)}
+        onChangeView={(view) => setActiveView(view as 'list' | 'kanban' | 'gantt' | 'workload')}
       />
       
       {activeView !== 'workload' && renderActionButtons()}

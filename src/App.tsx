@@ -12,6 +12,7 @@ import Notificaciones from "./pages/Notificaciones";
 import Aprobaciones from "./pages/Aprobaciones";
 import TeamDashboard from "./pages/TeamDashboard";
 import PortfolioDashboard from "./pages/PortfolioDashboard";
+import PortfolioGantt from "./pages/PortfolioGantt";
 import TareasSinProyecto from "./pages/TareasSinProyecto";
 import Project1A from "./pages/Project1A";
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/aprobaciones" element={<Aprobaciones />} />
           <Route path="/equipos/desarrollo" element={<TeamDashboard />} />
           <Route path="/portfolios/1" element={<PortfolioDashboard />} />
+          <Route path="/portfolios/1/gantt" element={<PortfolioGantt />} />
           <Route path="/tareas-sin-proyecto" element={<TareasSinProyecto />} />
           <Route path="/projects/1a" element={<Project1A />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

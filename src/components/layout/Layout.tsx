@@ -11,7 +11,7 @@ export default function Layout({ children }: LayoutProps) {
     <div className="flex min-h-screen">
       <AppSidebar />
       
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden ml-64">
         {children}
       </main>
     </div>

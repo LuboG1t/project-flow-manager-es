@@ -1,4 +1,6 @@
+
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import {
   BarChart,
@@ -16,13 +18,15 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Users, TrendingUp, Briefcase, Clock, Calendar, 
-  CheckSquare, XCircle, AlertTriangle, Trophy
+  CheckSquare, XCircle, AlertTriangle, Trophy, Plus, ChevronRight
 } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { AvatarGroup } from '@/components/ui/avatar-group';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GanttChart from '@/components/project/GanttChart';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function PortfolioDashboard() {
   // Sample data for charts
@@ -57,10 +61,22 @@ export default function PortfolioDashboard() {
   const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
   const tasks = [
-    { id: '1', name: 'Task 1', start: '01/04/2025', end: '10/04/2025', progress: 60 },
-    { id: '2', name: 'Task 2', start: '05/04/2025', end: '15/04/2025', progress: 30 },
-    { id: '3', name: 'Task 3', start: '12/04/2025', end: '22/04/2025', progress: 80 },
+    { id: '1', name: 'Proyecto 1A', start: '01/04/2025', end: '10/04/2025', progress: 60 },
+    { id: '2', name: 'Proyecto 1B', start: '05/04/2025', end: '15/04/2025', progress: 30 },
+    { id: '3', name: 'Proyecto 1C', start: '12/04/2025', end: '22/04/2025', progress: 80 },
   ];
+
+  const widgetOptions = [
+    'Resumen de proyectos',
+    'Distribución de tareas',
+    'Progreso del portafolio',
+    'Hitos importantes',
+    'Recursos asignados'
+  ];
+
+  const handleAddWidget = (widget: string) => {
+    console.log(`Añadiendo widget: ${widget}`);
+  };
 
   return (
     <Layout>
@@ -79,6 +95,25 @@ export default function PortfolioDashboard() {
                 <TabsTrigger value="quarter">Trimestre</TabsTrigger>
               </TabsList>
             </Tabs>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  Añadir widget
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {widgetOptions.map((widget) => (
+                  <DropdownMenuItem 
+                    key={widget} 
+                    onClick={() => handleAddWidget(widget)}
+                  >
+                    {widget}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -174,6 +209,68 @@ export default function PortfolioDashboard() {
           </Card>
         </div>
 
+        {/* Planificación del portafolio */}
+        <div className="mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Planificación del Portafolio</CardTitle>
+                <CardDescription>Distribución de tareas y tiempos</CardDescription>
+              </div>
+              <Link to="/portfolios/1/gantt">
+                <Button variant="outline" size="sm" className="gap-1">
+                  Ver Gantt Completo <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <GanttChart tasks={tasks} title="" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Status cards */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <Card className="bg-green-50 border-green-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-green-800 flex items-center gap-2">
+                <CheckSquare className="h-4 w-4" />
+                Tareas completadas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-800">72</div>
+              <p className="text-xs text-green-700">+5% respecto a la semana pasada</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-amber-50 border-amber-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-amber-800 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Tareas en riesgo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-amber-800">15</div>
+              <p className="text-xs text-amber-700">+2% respecto a la semana pasada</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-red-50 border-red-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-red-800 flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                Tareas con retraso
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-800">7</div>
+              <p className="text-xs text-red-700">+2 desde la semana pasada</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Charts */}
         <div className="grid grid-cols-2 gap-6 mb-6">
           <Card>
@@ -237,11 +334,6 @@ export default function PortfolioDashboard() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Gantt Chart */}
-        <div className="mb-6">
-          <GanttChart tasks={tasks} title="Planificación del Portafolio" />
         </div>
 
         {/* Team members and upcoming events */}
@@ -319,48 +411,6 @@ export default function PortfolioDashboard() {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Status summary */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card className="bg-green-50 border-green-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-green-800 flex items-center gap-2">
-                <CheckSquare className="h-4 w-4" />
-                Tareas completadas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-800">72</div>
-              <p className="text-xs text-green-700">+8% respecto a la semana pasada</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-amber-50 border-amber-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-amber-800 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Tareas en riesgo
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-800">15</div>
-              <p className="text-xs text-amber-700">-3% respecto a la semana pasada</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-red-50 border-red-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-red-800 flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
-                Tareas con retraso
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-800">7</div>
-              <p className="text-xs text-red-700">+2 desde la semana pasada</p>
             </CardContent>
           </Card>
         </div>

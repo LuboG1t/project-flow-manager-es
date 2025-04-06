@@ -15,7 +15,7 @@ export default function AppSidebar() {
   const location = useLocation();
   const [expanded, setExpanded] = useState({
     'desarrollo': true,
-    'portfolio-1': false
+    'portfolio-1': true
   });
   
   const toggleExpand = (key: string) => {
@@ -26,7 +26,7 @@ export default function AppSidebar() {
   };
 
   return (
-    <div className="min-h-screen w-64 border-r bg-background flex flex-col">
+    <div className="min-h-screen w-64 border-r bg-background flex flex-col fixed">
       <div className="p-4 border-b flex items-center justify-between">
         <Logo />
       </div>
@@ -83,6 +83,16 @@ export default function AppSidebar() {
           </div>
           
           <div className="space-y-1 px-2">
+            <Link to="/tareas-sin-proyecto" className={cn(
+              "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
+              location.pathname === "/tareas-sin-proyecto" 
+                ? "bg-primary/10 text-primary font-medium"
+                : "text-muted-foreground hover:bg-muted"
+            )}>
+              <CheckSquare className="h-4 w-4 mr-2" />
+              Tareas sin proyecto
+            </Link>
+            
             <div className="space-y-1">
               <div className="group">
                 <div className="flex items-center justify-between px-2 py-1.5 text-sm rounded-md hover:bg-muted cursor-pointer">
@@ -145,16 +155,6 @@ export default function AppSidebar() {
                 )}
               </div>
             </div>
-            
-            <Link to="/tareas-sin-proyecto" className={cn(
-              "flex items-center px-2 py-1.5 text-sm rounded-md w-full",
-              location.pathname === "/tareas-sin-proyecto" 
-                ? "bg-primary/10 text-primary font-medium"
-                : "text-muted-foreground hover:bg-muted"
-            )}>
-              <CheckSquare className="h-4 w-4 mr-2" />
-              Tareas sin proyecto
-            </Link>
           </div>
         </div>
       </div>

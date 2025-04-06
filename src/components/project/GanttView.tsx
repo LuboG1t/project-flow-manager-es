@@ -173,6 +173,28 @@ export default function GanttView({ projectId }: GanttViewProps) {
     );
   };
   
+  // Find the month index from the dates array
+  const findMonthIndices = () => {
+    const months = [];
+    let currentMonth = dates[0].getMonth();
+    let startIndex = 0;
+    
+    dates.forEach((date, index) => {
+      if (date.getMonth() !== currentMonth) {
+        months.push({ month: currentMonth, start: startIndex, end: index - 1 });
+        currentMonth = date.getMonth();
+        startIndex = index;
+      }
+    });
+    
+    // Add the last month
+    months.push({ month: currentMonth, start: startIndex, end: dates.length - 1 });
+    
+    return months;
+  };
+  
+  const monthIndices = findMonthIndices();
+  
   return (
     <div className="flex-1 border rounded-md bg-white overflow-hidden">
       <div className="flex h-full">
@@ -187,18 +209,16 @@ export default function GanttView({ projectId }: GanttViewProps) {
               <div className="flex-1 border-b overflow-hidden">
                 <div className="flex">
                   {/* Month labels */}
-                  {Array.from(new Set(dates.map(d => d.getMonth()))).map((month, i) => {
-                    const monthStart = dates.findIndex(d => d.getMonth() === month);
-                    const monthEnd = dates.findLastIndex(d => d.getMonth() === month);
-                    const width = ((monthEnd - monthStart + 1) / days) * 100;
+                  {monthIndices.map((item, i) => {
+                    const width = ((item.end - item.start + 1) / days) * 100;
                     
                     return (
                       <div 
-                        key={`month-${month}`} 
+                        key={`month-${item.month}`} 
                         className="text-center border-r bg-muted/10 text-xs font-medium py-1"
                         style={{ width: `${width}%` }}
                       >
-                        {months[month]}
+                        {months[item.month]}
                       </div>
                     );
                   })}
