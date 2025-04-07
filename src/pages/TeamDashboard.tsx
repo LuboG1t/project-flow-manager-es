@@ -79,18 +79,12 @@ export default function TeamDashboard() {
   return (
     <Layout>
       <div className="container py-6 max-w-7xl">
+        
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Dashboard del Equipo de Desarrollo</h1>
             <p className="text-muted-foreground">Rendimiento y estado general del equipo</p>
             <div className="mt-2">
-              <NavLink 
-                to="/equipos/desarrollo" 
-                className="text-primary hover:text-primary/90 text-sm font-medium flex items-center gap-1"
-              >
-                <Users className="h-4 w-4" />
-                <span>Ver detalles del equipo</span>
-              </NavLink>
             </div>
           </div>
           
@@ -208,10 +202,52 @@ export default function TeamDashboard() {
               </p>
               <div className="mt-3 w-full bg-muted rounded-full h-3">
                 <div
-                  className="bg-primary h-3 rounded-full"
+                  className="bg-blue-600 h-3 rounded-full"
                   style={{ width: '87%' }}
                 ></div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Status summary */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <Card className="bg-green-50 border-green-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-green-800 flex items-center gap-2">
+                <CheckSquare className="h-4 w-4" />
+                Tareas completadas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-800">72</div>
+              <p className="text-xs text-green-700">+8% respecto a la semana pasada</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-amber-50 border-amber-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-amber-800 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Tareas en riesgo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-amber-800">15</div>
+              <p className="text-xs text-amber-700">-3% respecto a la semana pasada</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-red-50 border-red-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-red-800 flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                Tareas con retraso
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-800">7</div>
+              <p className="text-xs text-red-700">+2 desde la semana pasada</p>
             </CardContent>
           </Card>
         </div>
@@ -353,48 +389,6 @@ export default function TeamDashboard() {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Status summary */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card className="bg-green-50 border-green-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-green-800 flex items-center gap-2">
-                <CheckSquare className="h-4 w-4" />
-                Tareas completadas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-800">72</div>
-              <p className="text-xs text-green-700">+8% respecto a la semana pasada</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-amber-50 border-amber-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-amber-800 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Tareas en riesgo
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-800">15</div>
-              <p className="text-xs text-amber-700">-3% respecto a la semana pasada</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-red-50 border-red-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-red-800 flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
-                Tareas con retraso
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-800">7</div>
-              <p className="text-xs text-red-700">+2 desde la semana pasada</p>
             </CardContent>
           </Card>
         </div>

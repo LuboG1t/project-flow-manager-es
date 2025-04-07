@@ -27,46 +27,7 @@ export default function Project1A() {
 
   const renderActionButtons = () => {
     return (
-      <div className="p-4 flex items-center justify-between">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Agregar
-              <ChevronDown className="h-4 w-4 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem>
-              <Milestone className="mr-2 h-4 w-4" />
-              <span>Nueva fase</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <SquarePen className="mr-2 h-4 w-4" />
-              <span>Nueva tarea</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <ListFilter className="mr-2 h-4 w-4" />
-              <span>Nueva subtarea</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Milestone className="mr-2 h-4 w-4" />
-              <span>Nuevo hito</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Filter className="h-4 w-4" />
-            Filtrar
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <SortDesc className="h-4 w-4" />
-            Ordenar
-          </Button>
-        </div>
-      </div>
+      <></>
     );
   };
 

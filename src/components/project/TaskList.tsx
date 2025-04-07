@@ -471,7 +471,7 @@ export default function TaskList({ projectId }: TaskListProps) {
   return (
     <div className="flex h-full">
       <div className="flex-1 overflow-auto">
-        <div className="p-4 flex items-center justify-between">
+        <div className="px-4 pt-4 flex items-center justify-between">
           {renderAddDropdown()}
           
           <div className="flex items-center gap-2">
