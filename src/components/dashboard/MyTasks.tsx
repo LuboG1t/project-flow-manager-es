@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -135,6 +136,7 @@ export default function MyTasks() {
     project: "sin-proyecto",
   });
 
+  // Datos de tareas
   const taskGroups: Record<string, Task[]> = {
     overdue: [
       {
@@ -332,6 +334,7 @@ export default function MyTasks() {
     ],
   };
 
+  // Datos de eventos próximos
   const upcomingEvents: Event[] = [
     {
       id: "event-1",
@@ -366,6 +369,7 @@ export default function MyTasks() {
     },
   ];
 
+  // Group tasks by status for Kanban view
   const tasksByStatus = Object.values(taskGroups)
     .flat()
     .reduce((acc, task) => {
@@ -397,6 +401,44 @@ export default function MyTasks() {
   const selectedTask = Object.values(taskGroups)
     .flat()
     .find((task) => task.id === selectedTaskId);
+
+  // Funciones para editar celdas
+  const handleStartEdit = (id: string, field: string, initialValue: string) => {
+    setEditingCell({ id, field });
+    setEditValue(initialValue);
+  };
+
+  const handleSaveEdit = () => {
+    // Aquí iría la lógica para guardar el cambio
+    console.log("Guardar cambio:", editingCell, editValue);
+    setEditingCell(null);
+  };
+
+  const handleNewTaskChange = (field: string, value: string) => {
+    setNewTask((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleNewEventChange = (field: string, value: string) => {
+    setNewEvent((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleCreateTask = () => {
+    console.log("Nueva tarea creada:", newTask);
+    setIsNewTaskDialogOpen(false);
+    // Aquí iría la lógica para crear la tarea
+  };
+
+  const handleCreateEvent = () => {
+    console.log("Nuevo evento creado:", newEvent);
+    setIsNewEventDialogOpen(false);
+    // Aquí iría la lógica para crear el evento
+  };
 
   const renderStatusBadge = (status: Task["status"]) => {
     return (
@@ -776,12 +818,10 @@ export default function MyTasks() {
                         <div className="truncate relative pr-6 max-w-[150px]">
                           <Link
                             to={task.projectLink}
-                            className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                            className="flex items-center gap-1.5 text-blue-600 hover:underline after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90"
                           >
-                            {task.location?.includes("/")
-                              ? task.location.split("/")[1].trim()
-                              : task.location}
-                            <LinkIcon className="h-3 w-3 shrink-0" />
+                            {task.location}
+                            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
                           </Link>
                         </div>
                       ) : (
