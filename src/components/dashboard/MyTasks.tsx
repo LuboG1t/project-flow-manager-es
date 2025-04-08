@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,15 +57,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 
 interface Task {
   id: string;
@@ -118,7 +108,6 @@ export default function MyTasks() {
   const [editValue, setEditValue] = useState<string>("");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
-  const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState({
     name: "",
     startDate: "",
@@ -126,13 +115,6 @@ export default function MyTasks() {
     duration: "",
     priority: "medium",
     timeEstimate: "",
-    project: "sin-proyecto",
-  });
-  const [newEvent, setNewEvent] = useState({
-    name: "",
-    date: "",
-    time: "",
-    location: "",
     project: "sin-proyecto",
   });
 
@@ -186,18 +168,6 @@ export default function MyTasks() {
         projectLink: "/projects/1b",
         timeSpent: "12h/16h",
       },
-      {
-        id: "task-14",
-        name: "Presentación de avances del sprint a stakeholders",
-        startDate: "15 abr",
-        dueDate: "19 abr",
-        duration: "5d",
-        status: "en-progreso",
-        priority: "medium",
-        location: "Portafolio 1 / Proyecto 1A",
-        projectLink: "/projects/1a",
-        timeSpent: "10h/12h",
-      },
     ],
     upcoming: [
       {
@@ -243,18 +213,6 @@ export default function MyTasks() {
         duration: "3d",
         status: "no-iniciado",
         priority: "high",
-        location: "Portafolio 1 / Proyecto 1A",
-        projectLink: "/projects/1a",
-        timeSpent: "-",
-      },
-      {
-        id: "task-17",
-        name: "Migración de datos a nuevo sistema de almacenamiento",
-        startDate: "29 abr",
-        dueDate: "03 may",
-        duration: "5d",
-        status: "no-iniciado",
-        priority: "medium",
         location: "Portafolio 1 / Proyecto 1A",
         projectLink: "/projects/1a",
         timeSpent: "-",
@@ -318,17 +276,6 @@ export default function MyTasks() {
         priority: "high",
         location: "Portafolio 1 / Proyecto 1B",
         projectLink: "/projects/1b",
-        timeSpent: "-",
-      },
-      {
-        id: "task-7",
-        name: "Elaboración de propuesta técnica para cliente potencial",
-        startDate: "24 abr",
-        dueDate: "25 abr",
-        duration: "2d",
-        status: "no-iniciado",
-        priority: "medium",
-        location: "Sin proyecto",
         timeSpent: "-",
       },
     ],
@@ -421,23 +368,10 @@ export default function MyTasks() {
     }));
   };
 
-  const handleNewEventChange = (field: string, value: string) => {
-    setNewEvent((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
   const handleCreateTask = () => {
     console.log("Nueva tarea creada:", newTask);
     setIsNewTaskDialogOpen(false);
     // Aquí iría la lógica para crear la tarea
-  };
-
-  const handleCreateEvent = () => {
-    console.log("Nuevo evento creado:", newEvent);
-    setIsNewEventDialogOpen(false);
-    // Aquí iría la lógica para crear el evento
   };
 
   const renderStatusBadge = (status: Task["status"]) => {
@@ -632,7 +566,7 @@ export default function MyTasks() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[180px]">Nombre</TableHead>
+                  <TableHead className="w-[250px]">Nombre</TableHead>
                   <TableHead className="min-w-[90px]">Inicio</TableHead>
                   <TableHead className="min-w-[90px]">Fin</TableHead>
                   <TableHead>Duración</TableHead>
@@ -650,7 +584,7 @@ export default function MyTasks() {
                     onClick={() => setSelectedTaskId(task.id)}
                   >
                     <TableCell className="font-medium">
-                      <div className="truncate relative pr-6 max-w-[150px]">
+                      <div className="truncate relative pr-6 max-w-[210px]">
                         <span className="after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90">
                           {task.name}
                         </span>
@@ -923,290 +857,139 @@ export default function MyTasks() {
                   </div>
                 </Card>
               ))}
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-muted-foreground py-6 border border-dashed"
+                onClick={() => setIsNewTaskDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Añadir una tarea
+              </Button>
             </div>
           </div>
         ))}
+
+        <div className="flex-shrink-0 w-14 flex items-start justify-center pt-10">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-10 w-10"
+          >
+            <PlusIcon className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
     );
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Mis Tareas</h1>
-          <p className="text-muted-foreground">
-            {currentDate} - Gestiona tus tareas y eventos
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Filter className="h-3.5 w-3.5" />
-                <span>Filtrar</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem>Estado</DropdownMenuItem>
-                <DropdownMenuItem>Prioridad</DropdownMenuItem>
-                <DropdownMenuItem>Proyecto</DropdownMenuItem>
-                <DropdownMenuItem>Fecha</DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <SortDesc className="h-3.5 w-3.5" />
-                <span>Ordenar</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem>Fecha (más reciente)</DropdownMenuItem>
-                <DropdownMenuItem>Fecha (más antigua)</DropdownMenuItem>
-                <DropdownMenuItem>Prioridad (alta a baja)</DropdownMenuItem>
-                <DropdownMenuItem>Prioridad (baja a alta)</DropdownMenuItem>
-                <DropdownMenuItem>Nombre (A-Z)</DropdownMenuItem>
-                <DropdownMenuItem>Nombre (Z-A)</DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" className="h-8 gap-1">
-                <Plus className="h-3.5 w-3.5" />
-                <span>Agregar</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setIsNewTaskDialogOpen(true)}>
-                Agregar tarea
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsNewEventDialogOpen(true)}>
-                Agregar evento
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <div className="border-l pl-2 flex">
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
-              className="h-8"
-              onClick={() => setViewMode("list")}
-            >
-              Lista
-            </Button>
-            <Button
-              variant={viewMode === "kanban" ? "default" : "ghost"}
-              size="sm"
-              className="h-8"
-              onClick={() => setViewMode("kanban")}
-            >
-              Kanban
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {viewMode === "list" && (
-        <div className="grid grid-cols-1 gap-6">
-          <div className="grid grid-cols-2 gap-6">
-            {renderTaskTable(taskGroups.pending, "Tareas Pendientes", false, "h-[300px]")}
-            {renderEvents()}
-          </div>
-          
-          {renderTaskTable(taskGroups.overdue, "Tareas Vencidas", true, "h-[300px]")}
-          {renderTaskTable(taskGroups.upcoming, "Tareas Por Vencer", true, "h-[300px]")}
-        </div>
-      )}
-
-      {viewMode === "kanban" && renderKanbanView()}
-
+  const renderNewTaskDialog = () => {
+    return (
       <Dialog open={isNewTaskDialogOpen} onOpenChange={setIsNewTaskDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Crear Nueva Tarea</DialogTitle>
+            <DialogTitle>Agregar nueva tarea</DialogTitle>
             <DialogDescription>
-              Completa el formulario para crear una nueva tarea.
+              Completa los detalles para crear una nueva tarea
             </DialogDescription>
           </DialogHeader>
+
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Nombre de la tarea</Label>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="taskName" className="text-right">
+                Nombre
+              </Label>
               <Input
-                id="name"
+                id="taskName"
                 value={newTask.name}
                 onChange={(e) => handleNewTaskChange("name", e.target.value)}
-                placeholder="Ej. Desarrollo de componente de UI"
+                className="col-span-3"
+                placeholder="Nombre de la tarea"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="startDate">Fecha de inicio</Label>
-                <Input
-                  id="startDate"
-                  value={newTask.startDate}
-                  onChange={(e) =>
-                    handleNewTaskChange("startDate", e.target.value)
-                  }
-                  placeholder="DD/MM/YYYY"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="dueDate">Fecha de vencimiento</Label>
-                <Input
-                  id="dueDate"
-                  value={newTask.dueDate}
-                  onChange={(e) =>
-                    handleNewTaskChange("dueDate", e.target.value)
-                  }
-                  placeholder="DD/MM/YYYY"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="duration">Duración</Label>
-                <Input
-                  id="duration"
-                  value={newTask.duration}
-                  onChange={(e) =>
-                    handleNewTaskChange("duration", e.target.value)
-                  }
-                  placeholder="Ej. 2d"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="priority">Prioridad</Label>
-                <Select
-                  value={newTask.priority}
-                  onValueChange={(value) =>
-                    handleNewTaskChange("priority", value)
-                  }
-                >
-                  <SelectTrigger id="priority">
-                    <SelectValue placeholder="Seleccionar prioridad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Baja</SelectItem>
-                    <SelectItem value="medium">Media</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="project">Proyecto</Label>
-              <Select
-                value={newTask.project}
-                onValueChange={(value) =>
-                  handleNewTaskChange("project", value)
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="startDate" className="text-right">
+                Fecha de inicio
+              </Label>
+              <Input
+                id="startDate"
+                value={newTask.startDate}
+                onChange={(e) =>
+                  handleNewTaskChange("startDate", e.target.value)
                 }
-              >
-                <SelectTrigger id="project">
-                  <SelectValue placeholder="Seleccionar proyecto" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sin-proyecto">Sin proyecto</SelectItem>
-                  <SelectItem value="proyecto-1a">Proyecto 1A</SelectItem>
-                  <SelectItem value="proyecto-1b">Proyecto 1B</SelectItem>
-                </SelectContent>
-              </Select>
+                className="col-span-3"
+                placeholder="DD/MM/AAAA"
+              />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="timeEstimate">Tiempo estimado</Label>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dueDate" className="text-right">
+                Fecha de vencimiento
+              </Label>
+              <Input
+                id="dueDate"
+                value={newTask.dueDate}
+                onChange={(e) => handleNewTaskChange("dueDate", e.target.value)}
+                className="col-span-3"
+                placeholder="DD/MM/AAAA"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="duration" className="text-right">
+                Duración
+              </Label>
+              <Input
+                id="duration"
+                value={newTask.duration}
+                onChange={(e) =>
+                  handleNewTaskChange("duration", e.target.value)
+                }
+                className="col-span-3"
+                placeholder="Ej: 3d, 1s"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="timeEstimate" className="text-right">
+                Tiempo estimado
+              </Label>
               <Input
                 id="timeEstimate"
                 value={newTask.timeEstimate}
                 onChange={(e) =>
                   handleNewTaskChange("timeEstimate", e.target.value)
                 }
-                placeholder="Ej. 8h"
+                className="col-span-3"
+                placeholder="Ej: 8h, 3d"
               />
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewTaskDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCreateTask}>Crear Tarea</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isNewEventDialogOpen} onOpenChange={setIsNewEventDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Crear Nuevo Evento</DialogTitle>
-            <DialogDescription>
-              Completa el formulario para crear un nuevo evento.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="eventName">Nombre del evento</Label>
-              <Input
-                id="eventName"
-                value={newEvent.name}
-                onChange={(e) => handleNewEventChange("name", e.target.value)}
-                placeholder="Ej. Reunión de planificación"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="eventDate">Fecha</Label>
-                <Input
-                  id="eventDate"
-                  value={newEvent.date}
-                  onChange={(e) =>
-                    handleNewEventChange("date", e.target.value)
-                  }
-                  placeholder="DD/MM/YYYY"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="eventTime">Hora</Label>
-                <Input
-                  id="eventTime"
-                  value={newEvent.time}
-                  onChange={(e) =>
-                    handleNewEventChange("time", e.target.value)
-                  }
-                  placeholder="HH:MM - HH:MM"
-                />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="eventLocation">Lugar o enlace</Label>
-              <Input
-                id="eventLocation"
-                value={newEvent.location}
-                onChange={(e) =>
-                  handleNewEventChange("location", e.target.value)
-                }
-                placeholder="Ubicación o enlace para el evento"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="eventProject">Proyecto</Label>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="priority" className="text-right">
+                Prioridad
+              </Label>
               <Select
-                value={newEvent.project}
+                value={newTask.priority}
                 onValueChange={(value) =>
-                  handleNewEventChange("project", value)
+                  handleNewTaskChange("priority", value)
                 }
               >
-                <SelectTrigger id="eventProject">
+                <SelectTrigger id="priority" className="col-span-3">
+                  <SelectValue placeholder="Seleccionar prioridad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Baja</SelectItem>
+                  <SelectItem value="medium">Media</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="project" className="text-right">
+                Proyecto
+              </Label>
+              <Select
+                value={newTask.project}
+                onValueChange={(value) => handleNewTaskChange("project", value)}
+              >
+                <SelectTrigger id="project" className="col-span-3">
                   <SelectValue placeholder="Seleccionar proyecto" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1217,120 +1000,217 @@ export default function MyTasks() {
               </Select>
             </div>
           </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewEventDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCreateEvent}>Crear Evento</Button>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button onClick={handleCreateTask}>Crear tarea</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    );
+  };
 
-      <Drawer open={selectedTaskId !== null} onOpenChange={(open) => !open && setSelectedTaskId(null)}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="border-b pb-4">
-            <DrawerTitle className="text-lg">Detalles de la tarea</DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="h-[calc(85vh-130px)] p-6">
-            {selectedTask && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-semibold">{selectedTask.name}</h2>
-                  {selectedTask.projectLink && (
-                    <Link
-                      to={selectedTask.projectLink}
-                      className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-1"
-                    >
-                      {selectedTask.location}
-                      <LinkIcon className="h-3.5 w-3.5" />
-                    </Link>
-                  )}
-                </div>
+  return (
+    <div className="container py-6 max-w-7xl">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Mis tareas</h1>
+          <p className="text-muted-foreground">
+            Gestiona tus tareas personales y de proyectos
+          </p>
+        </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Estado</p>
-                    {renderStatusBadge(selectedTask.status)}
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Asignado a</p>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <img src="https://i.pravatar.cc/300" alt="Avatar" />
-                      </Avatar>
-                      <span>Juan Pérez</span>
-                    </div>
-                  </div>
-                </div>
+        <div className="flex items-center gap-2">
+          <Tabs
+            value={viewMode}
+            onValueChange={(v) => setViewMode(v as "list" | "kanban")}
+          >
+            <TabsList>
+              <TabsTrigger value="list">Lista</TabsTrigger>
+              <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Prioridad</p>
-                    {renderPriorityBadge(selectedTask.priority)}
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Fecha</p>
-                    <p className="text-sm">
-                      {selectedTask.startDate} a {selectedTask.dueDate} ({selectedTask.duration})
-                    </p>
-                  </div>
-                </div>
+      <div className="mb-4 flex items-center justify-between">
+        <Button className="gap-1 bg-blue-600 hover:bg-blue-500" onClick={() => setIsNewTaskDialogOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Agregar tarea
+        </Button>
 
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Dependencias</p>
-                  <div className="text-sm">No hay dependencias</div>
-                </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border rounded-md overflow-hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-none"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-9 px-2 rounded-none flex items-center gap-1.5"
+            >
+              <Calendar className="h-4 w-4" />
+              <span>{currentDate}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-none"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
 
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Subtareas</p>
-                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
-                    No hay subtareas asignadas
-                  </div>
-                </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Filter className="h-4 w-4" />
+                Filtrar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>Estado</DropdownMenuItem>
+                <DropdownMenuItem>Prioridad</DropdownMenuItem>
+                <DropdownMenuItem>Proyecto</DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Tiempo registrado</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{selectedTask.timeSpent}</span>
-                    <Button variant="outline" size="sm" className="h-7 text-xs">
-                      Registrar tiempo
-                    </Button>
-                  </div>
-                </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <SortDesc className="h-4 w-4" />
+                Ordenar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>Prioridad (alta a baja)</DropdownMenuItem>
+                <DropdownMenuItem>Prioridad (baja a alta)</DropdownMenuItem>
+                <DropdownMenuItem>Nombre (A-Z)</DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
 
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Archivos</p>
-                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
-                    No hay archivos adjuntos
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Aprobaciones</p>
-                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
-                    No hay aprobaciones pendientes
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Comentarios</p>
-                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
-                    No hay comentarios
-                  </div>
-                </div>
-              </div>
-            )}
-          </ScrollArea>
-          <DrawerFooter className="border-t pt-4">
-            <div className="flex justify-between">
-              <Button variant="outline">Editar</Button>
-              <DrawerClose asChild>
-                <Button variant="ghost">Cerrar</Button>
-              </DrawerClose>
+      {viewMode === "list" ? (
+        <>
+          {/* Primera fila: Tareas Pendientes y Próximos Eventos */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="col-span-3">
+              {renderTaskTable(
+                taskGroups.pending,
+                "Tareas pendientes",
+                false,
+                "h-[200px]"
+              )}
             </div>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+            <div className="col-span-1">{renderEvents()}</div>
+          </div>
+
+          {/* Segunda fila: Tareas vencidas y próximas */}
+          <div className="grid grid-cols-1 gap-6 mb-6">
+            <div className="col-span-1">{renderOverdueTasks()}</div>
+            <div className="col-span-1">
+              {renderTaskTable(
+                taskGroups.upcoming,
+                "Tareas próximas a vencer",
+                true,
+                "h-[200px]"
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        // Vista Kanban
+        renderKanbanView()
+      )}
+
+      {renderNewTaskDialog()}
+
+      {selectedTaskId && selectedTask && (
+        <div className="fixed inset-y-0 right-0 w-[400px] bg-background border-l shadow-lg z-40">
+          <div className="absolute top-2 right-2 z-10">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedTaskId(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <TaskDetails
+            task={{
+              id: selectedTask.id,
+              name: selectedTask.name,
+              startDate: selectedTask.startDate,
+              endDate: selectedTask.dueDate,
+              duration: selectedTask.duration,
+              status:
+                selectedTask.status === "no-iniciado"
+                  ? "new"
+                  : selectedTask.status === "en-progreso"
+                  ? "in-progress"
+                  : selectedTask.status === "completado"
+                  ? "completed"
+                  : "new",
+              priority: selectedTask.priority,
+              assignedTo: {
+                name: "Usuario",
+                initials: "US",
+              },
+              timeSpent: selectedTask.timeSpent,
+            }}
+            onClose={() => setSelectedTaskId(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }
+
+// Componente de ChevronLeft
+const ChevronLeft = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
+);
+
+const ChevronRight = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M9 18l6-6-6-6" />
+  </svg>
+);
