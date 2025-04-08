@@ -135,7 +135,6 @@ export default function MyTasks() {
     project: "sin-proyecto",
   });
 
-  // Datos de tareas
   const taskGroups: Record<string, Task[]> = {
     overdue: [
       {
@@ -333,7 +332,6 @@ export default function MyTasks() {
     ],
   };
 
-  // Datos de eventos próximos
   const upcomingEvents: Event[] = [
     {
       id: "event-1",
@@ -368,7 +366,6 @@ export default function MyTasks() {
     },
   ];
 
-  // Group tasks by status for Kanban view
   const tasksByStatus = Object.values(taskGroups)
     .flat()
     .reduce((acc, task) => {
@@ -400,44 +397,6 @@ export default function MyTasks() {
   const selectedTask = Object.values(taskGroups)
     .flat()
     .find((task) => task.id === selectedTaskId);
-
-  // Funciones para editar celdas
-  const handleStartEdit = (id: string, field: string, initialValue: string) => {
-    setEditingCell({ id, field });
-    setEditValue(initialValue);
-  };
-
-  const handleSaveEdit = () => {
-    // Aquí iría la lógica para guardar el cambio
-    console.log("Guardar cambio:", editingCell, editValue);
-    setEditingCell(null);
-  };
-
-  const handleNewTaskChange = (field: string, value: string) => {
-    setNewTask((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleNewEventChange = (field: string, value: string) => {
-    setNewEvent((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleCreateTask = () => {
-    console.log("Nueva tarea creada:", newTask);
-    setIsNewTaskDialogOpen(false);
-    // Aquí iría la lógica para crear la tarea
-  };
-
-  const handleCreateEvent = () => {
-    console.log("Nuevo evento creado:", newEvent);
-    setIsNewEventDialogOpen(false);
-    // Aquí iría la lógica para crear el evento
-  };
 
   const renderStatusBadge = (status: Task["status"]) => {
     return (
@@ -817,10 +776,12 @@ export default function MyTasks() {
                         <div className="truncate relative pr-6 max-w-[150px]">
                           <Link
                             to={task.projectLink}
-                            className="flex items-center gap-1.5 text-blue-600 hover:underline after:absolute after:right-0 after:top-0 after:h-full after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background/90"
+                            className="text-xs text-blue-600 hover:underline flex items-center gap-1"
                           >
-                            {task.location}
-                            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                            {task.location?.includes("/")
+                              ? task.location.split("/")[1].trim()
+                              : task.location}
+                            <LinkIcon className="h-3 w-3 shrink-0" />
                           </Link>
                         </div>
                       ) : (
@@ -916,4 +877,420 @@ export default function MyTasks() {
                       </div>
                     ) : (
                       <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                        {
+                        {task.location}
+                      </span>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Mis Tareas</h1>
+          <p className="text-muted-foreground">
+            {currentDate} - Gestiona tus tareas y eventos
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1">
+                <Filter className="h-3.5 w-3.5" />
+                <span>Filtrar</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Filtrar por</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>Estado</DropdownMenuItem>
+                <DropdownMenuItem>Prioridad</DropdownMenuItem>
+                <DropdownMenuItem>Proyecto</DropdownMenuItem>
+                <DropdownMenuItem>Fecha</DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1">
+                <SortDesc className="h-3.5 w-3.5" />
+                <span>Ordenar</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem>Fecha (más reciente)</DropdownMenuItem>
+                <DropdownMenuItem>Fecha (más antigua)</DropdownMenuItem>
+                <DropdownMenuItem>Prioridad (alta a baja)</DropdownMenuItem>
+                <DropdownMenuItem>Prioridad (baja a alta)</DropdownMenuItem>
+                <DropdownMenuItem>Nombre (A-Z)</DropdownMenuItem>
+                <DropdownMenuItem>Nombre (Z-A)</DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="h-8 gap-1">
+                <Plus className="h-3.5 w-3.5" />
+                <span>Agregar</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsNewTaskDialogOpen(true)}>
+                Agregar tarea
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsNewEventDialogOpen(true)}>
+                Agregar evento
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="border-l pl-2 flex">
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              className="h-8"
+              onClick={() => setViewMode("list")}
+            >
+              Lista
+            </Button>
+            <Button
+              variant={viewMode === "kanban" ? "default" : "ghost"}
+              size="sm"
+              className="h-8"
+              onClick={() => setViewMode("kanban")}
+            >
+              Kanban
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {viewMode === "list" && (
+        <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-2 gap-6">
+            {renderTaskTable(taskGroups.pending, "Tareas Pendientes", false, "h-[300px]")}
+            {renderEvents()}
+          </div>
+          
+          {renderTaskTable(taskGroups.overdue, "Tareas Vencidas", true, "h-[300px]")}
+          {renderTaskTable(taskGroups.upcoming, "Tareas Por Vencer", true, "h-[300px]")}
+        </div>
+      )}
+
+      {viewMode === "kanban" && renderKanbanView()}
+
+      <Dialog open={isNewTaskDialogOpen} onOpenChange={setIsNewTaskDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Crear Nueva Tarea</DialogTitle>
+            <DialogDescription>
+              Completa el formulario para crear una nueva tarea.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Nombre de la tarea</Label>
+              <Input
+                id="name"
+                value={newTask.name}
+                onChange={(e) => handleNewTaskChange("name", e.target.value)}
+                placeholder="Ej. Desarrollo de componente de UI"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="startDate">Fecha de inicio</Label>
+                <Input
+                  id="startDate"
+                  value={newTask.startDate}
+                  onChange={(e) =>
+                    handleNewTaskChange("startDate", e.target.value)
+                  }
+                  placeholder="DD/MM/YYYY"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="dueDate">Fecha de vencimiento</Label>
+                <Input
+                  id="dueDate"
+                  value={newTask.dueDate}
+                  onChange={(e) =>
+                    handleNewTaskChange("dueDate", e.target.value)
+                  }
+                  placeholder="DD/MM/YYYY"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="duration">Duración</Label>
+                <Input
+                  id="duration"
+                  value={newTask.duration}
+                  onChange={(e) =>
+                    handleNewTaskChange("duration", e.target.value)
+                  }
+                  placeholder="Ej. 2d"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="priority">Prioridad</Label>
+                <Select
+                  value={newTask.priority}
+                  onValueChange={(value) =>
+                    handleNewTaskChange("priority", value)
+                  }
+                >
+                  <SelectTrigger id="priority">
+                    <SelectValue placeholder="Seleccionar prioridad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Baja</SelectItem>
+                    <SelectItem value="medium">Media</SelectItem>
+                    <SelectItem value="high">Alta</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="project">Proyecto</Label>
+              <Select
+                value={newTask.project}
+                onValueChange={(value) =>
+                  handleNewTaskChange("project", value)
+                }
+              >
+                <SelectTrigger id="project">
+                  <SelectValue placeholder="Seleccionar proyecto" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sin-proyecto">Sin proyecto</SelectItem>
+                  <SelectItem value="proyecto-1a">Proyecto 1A</SelectItem>
+                  <SelectItem value="proyecto-1b">Proyecto 1B</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="timeEstimate">Tiempo estimado</Label>
+              <Input
+                id="timeEstimate"
+                value={newTask.timeEstimate}
+                onChange={(e) =>
+                  handleNewTaskChange("timeEstimate", e.target.value)
+                }
+                placeholder="Ej. 8h"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNewTaskDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateTask}>Crear Tarea</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isNewEventDialogOpen} onOpenChange={setIsNewEventDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Crear Nuevo Evento</DialogTitle>
+            <DialogDescription>
+              Completa el formulario para crear un nuevo evento.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="eventName">Nombre del evento</Label>
+              <Input
+                id="eventName"
+                value={newEvent.name}
+                onChange={(e) => handleNewEventChange("name", e.target.value)}
+                placeholder="Ej. Reunión de planificación"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="eventDate">Fecha</Label>
+                <Input
+                  id="eventDate"
+                  value={newEvent.date}
+                  onChange={(e) =>
+                    handleNewEventChange("date", e.target.value)
+                  }
+                  placeholder="DD/MM/YYYY"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="eventTime">Hora</Label>
+                <Input
+                  id="eventTime"
+                  value={newEvent.time}
+                  onChange={(e) =>
+                    handleNewEventChange("time", e.target.value)
+                  }
+                  placeholder="HH:MM - HH:MM"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="eventLocation">Lugar o enlace</Label>
+              <Input
+                id="eventLocation"
+                value={newEvent.location}
+                onChange={(e) =>
+                  handleNewEventChange("location", e.target.value)
+                }
+                placeholder="Ubicación o enlace para el evento"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="eventProject">Proyecto</Label>
+              <Select
+                value={newEvent.project}
+                onValueChange={(value) =>
+                  handleNewEventChange("project", value)
+                }
+              >
+                <SelectTrigger id="eventProject">
+                  <SelectValue placeholder="Seleccionar proyecto" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sin-proyecto">Sin proyecto</SelectItem>
+                  <SelectItem value="proyecto-1a">Proyecto 1A</SelectItem>
+                  <SelectItem value="proyecto-1b">Proyecto 1B</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNewEventDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateEvent}>Crear Evento</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Drawer open={selectedTaskId !== null} onOpenChange={(open) => !open && setSelectedTaskId(null)}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="border-b pb-4">
+            <DrawerTitle className="text-lg">Detalles de la tarea</DrawerTitle>
+          </DrawerHeader>
+          <ScrollArea className="h-[calc(85vh-130px)] p-6">
+            {selectedTask && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold">{selectedTask.name}</h2>
+                  {selectedTask.projectLink && (
+                    <Link
+                      to={selectedTask.projectLink}
+                      className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-1"
+                    >
+                      {selectedTask.location}
+                      <LinkIcon className="h-3.5 w-3.5" />
+                    </Link>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Estado</p>
+                    {renderStatusBadge(selectedTask.status)}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Asignado a</p>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <img src="https://i.pravatar.cc/300" alt="Avatar" />
+                      </Avatar>
+                      <span>Juan Pérez</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Prioridad</p>
+                    {renderPriorityBadge(selectedTask.priority)}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Fecha</p>
+                    <p className="text-sm">
+                      {selectedTask.startDate} a {selectedTask.dueDate} ({selectedTask.duration})
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Dependencias</p>
+                  <div className="text-sm">No hay dependencias</div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Subtareas</p>
+                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
+                    No hay subtareas asignadas
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Tiempo registrado</p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{selectedTask.timeSpent}</span>
+                    <Button variant="outline" size="sm" className="h-7 text-xs">
+                      Registrar tiempo
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Archivos</p>
+                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
+                    No hay archivos adjuntos
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Aprobaciones</p>
+                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
+                    No hay aprobaciones pendientes
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Comentarios</p>
+                  <div className="text-sm bg-muted/50 rounded-md p-4 text-center">
+                    No hay comentarios
+                  </div>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+          <DrawerFooter className="border-t pt-4">
+            <div className="flex justify-between">
+              <Button variant="outline">Editar</Button>
+              <DrawerClose asChild>
+                <Button variant="ghost">Cerrar</Button>
+              </DrawerClose>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  );
+}
